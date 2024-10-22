@@ -20,5 +20,5 @@ services:
     volumes:
       - .docker/dbdata:/var/lib/postgresql/data
     environment:
-      - POSTGRES_PASSWORD=nest-auth-secret
-      - POSTGRES_DB=nest-auth
+      - POSTGRES_PASSWORD=candy-stock-secret
+      - POSTGRES_DB=candy-stock
