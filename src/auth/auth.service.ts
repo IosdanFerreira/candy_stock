@@ -1,27 +1,81 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { AuthRepository } from './repositories/auth.repository';
+import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+import refreshJwtConfig from './config/refresh-jwt.config';
+import { ConfigType } from '@nestjs/config';
+import { AuthEntity } from './entities/auth.entity';
+import { UserPayload } from './models/user-payload.model';
 
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly repository: AuthRepository,
+    @Inject(refreshJwtConfig.KEY)
+    private refreshTokenConfig: ConfigType<typeof refreshJwtConfig>,
+  ) {}
+
+  async validateUser(email: string, password: string) {
+    const existingUser = await this.repository.findUserByEmail(email);
+
+    if (existingUser) {
+      const isValidPassword = await bcrypt.compare(
+        password,
+        existingUser.password,
+      );
+
+      if (isValidPassword) {
+        delete existingUser.password;
+
+        return {
+          ...existingUser,
+        };
+      }
+    }
+    throw new Error('Email ou senha inválidos');
   }
 
-  findAll() {
-    return `This action returns all auth`;
+  signUp(createAuthDto: CreateAuthDto) {
+    return this.repository.signUp(createAuthDto);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
+  login(user: AuthEntity) {
+    // Transforma um user em um JWT
+    const payload: UserPayload = {
+      sub: user.id,
+      email: user.email,
+      name: user.name,
+    };
+
+    // Gera o token de acesso e o refresh token
+    const accessToken = this.jwtService.sign(payload);
+    const refreshToken = this.jwtService.sign(payload, this.refreshTokenConfig);
+
+    return {
+      ...user,
+      accessToken,
+      refreshToken,
+    };
   }
 
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
+  refresh(user: AuthEntity) {
+    // Transforma um user em um JWT
+    const payload: UserPayload = {
+      sub: user.id,
+      email: user.email,
+      name: user.name,
+    };
 
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+    // Gera o token de acesso e o refresh token novamente
+    const accessToken = this.jwtService.sign(payload);
+    const refreshToken = this.jwtService.sign(payload, this.refreshTokenConfig);
+
+    return {
+      accessToken,
+      refreshToken,
+    };
   }
 }

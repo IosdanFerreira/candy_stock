@@ -7,21 +7,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum TransactionType {
-  IN
-  OUT
-}
-
 model User {
   id       Int     @id @default(autoincrement())
   name     String
   email    String? @unique
   password String
-  role     String
   phone    String?
 
-  roles              UserRole[]
-  stock_transactions StockTransaction[]
+  role_id Int
+  role    Role @relation(fields: [role_id], references: [id])
+
+  productions                 Production[]
+  production_responsibilities ProductionResponsibility[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -33,7 +30,7 @@ model Role {
   id        Int    @id @default(autoincrement())
   role_name String @unique
 
-  users UserRole[]
+  users User[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -41,48 +38,226 @@ model Role {
   @@map("roles")
 }
 
-model UserRole {
-  user    User @relation(fields: [user_id], references: [id])
-  user_id Int
+model Product {
+  id             Int     @id @default(autoincrement())
+  code           Int
+  name           String
+  description    String?
+  price          Int
+  priority_order Int
+  icms           Boolean
+  observations   String?
 
-  role    Role @relation(fields: [role_id], references: [id])
-  role_id Int
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-
-  @@id([user_id, role_id])
-  @@map("users_roles")
-}
-
-model Good {
-  id          Int     @id @default(autoincrement())
-  name        String
-  description String?
-  quantity    Int
-  price       Int
-
-  stock_transactions StockTransaction[]
+  warehouse_prodcts      WarehouseProduct[]
+  financial_transactions FinancialTransaction[]
+  productions            Production[]
+  alerts                 Alert[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  @@map("goods")
+  @@map("products")
 }
 
-model StockTransaction {
+model Warehouse {
+  id                Int      @id @default(autoincrement())
+  acronym           String
+  description       String
+  registration_date DateTime
+  capacity          Int
+  stored            Int
+
+  warehouse_prodcts       WarehouseProduct[]
+  productions             Production[]       @relation("production_location")
+  destination_productions Production[]       @relation("production_destination")
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("warehouses")
+}
+
+model WarehouseProduct {
+  product_id Int
+  product    Product @relation(fields: [product_id], references: [id])
+
+  warehouse_id Int
+  warehouse    Warehouse @relation(fields: [warehouse_id], references: [id])
+
+  quantity Int
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@unique([warehouse_id, product_id])
+  @@map("warehouses_prooducts")
+}
+
+model FinancialTransaction {
   id Int @id @default(autoincrement())
 
-  user    User? @relation(fields: [user_id], references: [id])
-  user_id Int?
+  product_id Int
+  product    Product @relation(fields: [product_id], references: [id])
 
-  good    Good? @relation(fields: [good_id], references: [id])
-  good_id Int?
+  payment_method_id Int
+  payment_method    PaymentMethod @relation(fields: [payment_method_id], references: [id])
 
-  transaction_type TransactionType
+  seller_id Int
+  seller    Seller @relation(fields: [seller_id], references: [id])
+
+  client_id Int
+  client    Client @relation(fields: [client_id], references: [id])
+
+  quantity     Int
+  unit_price   Int
+  total_amount Int
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  @@map("stock_transactions")
+  @@map("financial_transactions")
+}
+
+model PaymentMethod {
+  id          Int     @id @default(autoincrement())
+  name        String
+  observation String?
+
+  financial_transactions FinancialTransaction[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("payment_methods")
+}
+
+model Seller {
+  id            Int       @id @default(autoincrement())
+  name          String
+  admssion_date DateTime
+  cpf           String    @unique
+  birth_date    String?
+  cep           String?
+  street_name   String?
+  house_number  String?
+  city_name     String?
+  neighborhood  String?
+  state         String?
+  phone_1       String?
+  phone_2       String?
+  obs           String?
+  dimissal_date DateTime?
+
+  financial_transactions FinancialTransaction[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("sellers")
+}
+
+model Client {
+  id                 Int      @id @default(autoincrement())
+  name               String
+  email              String   @unique
+  cpf                String?  @unique
+  cnpj               String   @unique
+  state_registration String   @unique
+  registration_date  DateTime
+  birth_date         String?
+  cep                String?
+  street_name        String?
+  house_number       String?
+  city_name          String?
+  neighborhood       String?
+  state              String?
+  phone_1            String
+  phone_2            String?
+  whatsapp           String?
+  obs                String?
+
+  FinancialTransaction FinancialTransaction[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("clients")
+}
+
+model Production {
+  id Int @id @default(autoincrement())
+
+  product_id Int
+  product    Product @relation(fields: [product_id], references: [id])
+
+  warehouse_id Int
+  warehouse    Warehouse @relation("production_location", fields: [warehouse_id], references: [id])
+
+  destination_warehouse_id Int
+  destination_warehouse    Warehouse @relation("production_destination", fields: [destination_warehouse_id], references: [id])
+
+  liters              Int
+  storage_temperature Int
+  status              String
+
+  user_id Int
+  user    User @relation(fields: [user_id], references: [id])
+
+  obs String?
+
+  production_steps ProductionSteps[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("productions")
+}
+
+model ProductionSteps {
+  id Int @id @default(autoincrement())
+
+  production_id Int
+  production    Production @relation(fields: [production_id], references: [id])
+
+  step_order  Int
+  description String
+  status      String @default("Pending")
+
+  ProductionResponsibility ProductionResponsibility[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("productions_steps")
+}
+
+model Alert {
+  id Int @id @default(autoincrement())
+
+  product_id Int
+  product    Product @relation(fields: [product_id], references: [id])
+
+  alert_type String
+  message    String
+  is_read    Boolean @default(false)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("alerts")
+}
+
+model ProductionResponsibility {
+  id                  Int       @id @default(autoincrement())
+  production_step_id  Int
+  responsible_user_id Int
+  deadline            DateTime?
+
+  production_step  ProductionSteps @relation(fields: [production_step_id], references: [id])
+  responsible_user User            @relation(fields: [responsible_user_id], references: [id])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("productions_responsabilities")
 }
