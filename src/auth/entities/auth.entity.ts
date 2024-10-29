@@ -5,7 +5,7 @@ export class AuthEntity implements User {
   name: string;
   email: string;
   password: string;
-  role: 'admin' | 'employee';
+  role_id: number;
   phone: string;
   created_at: Date;
   updated_at: Date;

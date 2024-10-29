@@ -28,7 +28,7 @@ export class CreateAuthDto {
 
   @IsString({ message: 'Este campo deve ser um string' })
   @IsNotEmpty({ message: 'Este campo é obrigatório' })
-  role: 'admin' | 'employee';
+  role_id: number;
 
   @IsString({ message: 'Este campo deve ser um string' })
   phone?: string;

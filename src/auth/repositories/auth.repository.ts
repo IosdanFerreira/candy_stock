@@ -17,6 +17,9 @@ export class AuthRepository {
     const data: Prisma.UserCreateInput = {
       ...createAuthDto,
       password: await bcrypt.hash(password, 10),
+      role: {
+        connect: { id: createAuthDto.role_id },
+      },
     };
 
     const createdUser = await this.prisma.user.create({
