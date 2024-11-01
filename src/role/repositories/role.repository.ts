@@ -4,6 +4,7 @@ import { CreateRoleDto } from 'src/role/dto/create-role.dto';
 import { UpdateRoleDto } from '../dto/update-role.dto';
 import { NotFoundError } from 'src/common/errors/types/not-found-error';
 import { RoleEntity } from '../entities/role.entity';
+import { DefaultRoleResponse } from '../models/default-role-response.model';
 
 @Injectable()
 export class RoleRepository {
@@ -63,7 +64,7 @@ export class RoleRepository {
     return role;
   }
 
-  async removeRole(id: number) {
+  async removeRole(id: number): Promise<DefaultRoleResponse> {
     const existingRole = await this.prisma.role.findUnique({
       where: { id },
     });

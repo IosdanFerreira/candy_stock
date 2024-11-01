@@ -9,6 +9,8 @@ import { ConfigType } from '@nestjs/config';
 import { AuthEntity } from './entities/auth.entity';
 import { UserPayload } from './models/user-payload.model';
 import { UserWithToken } from './models/user-with-token.model';
+import { AuthUser } from './models/auth-user.model';
+import { RefreshToken } from './models/refresh-token.model';
 
 @Injectable()
 export class AuthService {
@@ -19,7 +21,7 @@ export class AuthService {
     private refreshTokenConfig: ConfigType<typeof refreshJwtConfig>,
   ) {}
 
-  async validateUser(email: string, password: string) {
+  async validateUser(email: string, password: string): Promise<AuthUser> {
     const existingUser = await this.repository.findUserByEmail(email);
 
     if (existingUser) {
@@ -39,11 +41,11 @@ export class AuthService {
     throw new Error('Email ou senha inválidos');
   }
 
-  signUp(createAuthDto: CreateAuthDto) {
+  signUp(createAuthDto: CreateAuthDto): Promise<AuthUser> {
     return this.repository.signUp(createAuthDto);
   }
 
-  login(user: AuthEntity) {
+  login(user: AuthEntity): UserWithToken {
     // Transforma um user em um JWT
     const payload: UserPayload = {
       sub: user.id,
@@ -55,7 +57,7 @@ export class AuthService {
     const accessToken = this.jwtService.sign(payload);
     const refreshToken = this.jwtService.sign(payload, this.refreshTokenConfig);
 
-    const authUser: UserWithToken = {
+    const authUser = {
       ...user,
       accessToken,
       refreshToken,
@@ -64,7 +66,7 @@ export class AuthService {
     return authUser;
   }
 
-  refresh(user: AuthEntity) {
+  refresh(user: AuthEntity): RefreshToken {
     // Transforma um user em um JWT
     const payload: UserPayload = {
       sub: user.id,
