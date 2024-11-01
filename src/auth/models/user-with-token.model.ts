@@ -1,6 +1,6 @@
 import { AuthEntity } from '../entities/auth.entity';
 
-export interface UserToken extends AuthEntity {
+export interface UserWithToken extends AuthEntity {
   accessToken: string;
   refreshToken: string;
 }

@@ -8,6 +8,7 @@ import refreshJwtConfig from './config/refresh-jwt.config';
 import { ConfigType } from '@nestjs/config';
 import { AuthEntity } from './entities/auth.entity';
 import { UserPayload } from './models/user-payload.model';
+import { UserWithToken } from './models/user-with-token.model';
 
 @Injectable()
 export class AuthService {
@@ -54,11 +55,13 @@ export class AuthService {
     const accessToken = this.jwtService.sign(payload);
     const refreshToken = this.jwtService.sign(payload, this.refreshTokenConfig);
 
-    return {
+    const authUser: UserWithToken = {
       ...user,
       accessToken,
       refreshToken,
     };
+
+    return authUser;
   }
 
   refresh(user: AuthEntity) {

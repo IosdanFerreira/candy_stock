@@ -1,48 +1,26 @@
-/*
-  Warnings:
+-- CreateTable
+CREATE TABLE "users" (
+    "id" SERIAL NOT NULL,
+    "name" TEXT NOT NULL,
+    "email" TEXT,
+    "password" TEXT NOT NULL,
+    "phone" TEXT,
+    "role_id" INTEGER NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
-  - You are about to drop the column `role` on the `users` table. All the data in the column will be lost.
-  - You are about to drop the `goods` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `stock_transactions` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `users_roles` table. If the table is not empty, all the data it contains will be lost.
-  - Changed the type of `role_name` on the `roles` table. No cast exists, the column would be dropped and recreated, which cannot be done if there is data, since the column is required.
-  - Added the required column `role_id` to the `users` table without a default value. This is not possible if the table is not empty.
+    CONSTRAINT "users_pkey" PRIMARY KEY ("id")
+);
 
-*/
--- DropForeignKey
-ALTER TABLE "stock_transactions" DROP CONSTRAINT "stock_transactions_good_id_fkey";
+-- CreateTable
+CREATE TABLE "roles" (
+    "id" SERIAL NOT NULL,
+    "role_name" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
--- DropForeignKey
-ALTER TABLE "stock_transactions" DROP CONSTRAINT "stock_transactions_user_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "users_roles" DROP CONSTRAINT "users_roles_role_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "users_roles" DROP CONSTRAINT "users_roles_user_id_fkey";
-
--- AlterTable
-ALTER TABLE "roles" DROP COLUMN "role_name",
-ADD COLUMN     "role_name" TEXT NOT NULL;
-
--- AlterTable
-ALTER TABLE "users" DROP COLUMN "role",
-ADD COLUMN     "role_id" INTEGER NOT NULL;
-
--- DropTable
-DROP TABLE "goods";
-
--- DropTable
-DROP TABLE "stock_transactions";
-
--- DropTable
-DROP TABLE "users_roles";
-
--- DropEnum
-DROP TYPE "RoleType";
-
--- DropEnum
-DROP TYPE "TransactionType";
+    CONSTRAINT "roles_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "products" (
@@ -215,6 +193,12 @@ CREATE TABLE "productions_responsabilities" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "roles_role_name_key" ON "roles"("role_name");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "warehouses_prooducts_warehouse_id_product_id_key" ON "warehouses_prooducts"("warehouse_id", "product_id");
 
 -- CreateIndex
@@ -231,9 +215,6 @@ CREATE UNIQUE INDEX "clients_cnpj_key" ON "clients"("cnpj");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "clients_state_registration_key" ON "clients"("state_registration");
-
--- CreateIndex
-CREATE UNIQUE INDEX "roles_role_name_key" ON "roles"("role_name");
 
 -- AddForeignKey
 ALTER TABLE "users" ADD CONSTRAINT "users_role_id_fkey" FOREIGN KEY ("role_id") REFERENCES "roles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
