@@ -4,8 +4,8 @@ import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { UnauthorizedInterceptor } from './common/interceptors/unauthorized.interceptor';
 import { ConflictInterceptor } from './common/interceptors/conflict.interceptor';
 import { DatabaseInterceptor } from './common/interceptors/database.interceptor';
-import { PrismaValidationInterceptor } from './common/interceptors/prisma-validation.interceptor';
-import { NotFoundInterceptor } from './common/interceptors/not-found.interceptor';
+import { PrismaValidationInterceptor } from './common/interceptors/prisma_validation.interceptor';
+import { NotFoundInterceptor } from './common/interceptors/not_found.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

@@ -1,11 +1,4 @@
-import {
-  IsBoolean,
-  IsInt,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  Min,
-} from 'class-validator';
+import { IsBoolean, IsInt, IsNotEmpty, IsString, Min } from 'class-validator';
 
 export class CreateProductDto {
   @IsString({ message: 'Este campo deve ser do tipo string' })
@@ -17,7 +10,7 @@ export class CreateProductDto {
   code: number;
 
   @IsString({ message: 'Este campo deve ser um string' })
-  @IsOptional()
+  @IsNotEmpty({ message: 'Este campo é obrigatório' })
   description: string | null;
 
   @IsInt({ message: 'Este campo deve ser do tipo number' })
@@ -30,10 +23,10 @@ export class CreateProductDto {
   priority_order: number;
 
   @IsBoolean({ message: 'Este campo deve ser do tipo boolean' })
-  @IsOptional()
+  @IsNotEmpty({ message: 'Este campo é obrigatório' })
   icms: boolean;
 
   @IsString({ message: 'Este campo deve ser um string' })
-  @IsOptional()
+  @IsNotEmpty({ message: 'Este campo é obrigatório' })
   observations: string | null;
 }

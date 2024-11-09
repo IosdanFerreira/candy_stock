@@ -33,8 +33,8 @@ export class AuthController {
     return this.authService.signUp(createAuthDto);
   }
 
-  @isPublic()
   @Post('refreshToken')
+  @isPublic()
   @HttpCode(HttpStatus.OK)
   @UseGuards(RefreshJwtAuthGuard)
   async refreshToken(@Request() req) {

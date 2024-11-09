@@ -90,7 +90,7 @@ model WarehouseProduct {
   updated_at DateTime @updatedAt
 
   @@unique([warehouse_id, product_id])
-  @@map("warehouses_prooducts")
+  @@map("warehouses_products")
 }
 
 model FinancialTransaction {
@@ -259,5 +259,5 @@ model ProductionResponsibility {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  @@map("productions_responsabilities")
+  @@map("productions_responsibilities")
 }
