@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateProductDto } from './dto/create_product.dto';
 import { ProductRepository } from './repositories/product.repository';
 import { paginationMeta } from 'src/common/utils/pagination_meta.utils';
+import { UpdateProductDto } from './dto/update_product.dto';
 
 @Injectable()
 export class ProductService {
@@ -62,15 +63,15 @@ export class ProductService {
     };
   }
 
-  // findOne(id: number) {
-  //   return `This action returns a #${id} product`;
-  // }
+  findOne(id: number) {
+    return this.repository.findProductByID(id);
+  }
 
-  // update(id: number, updateProductDto: UpdateProductDto) {
-  //   return `This action updates a #${id} product`;
-  // }
+  update(id: number, updateProductDto: UpdateProductDto) {
+    return this.repository.updateProduct(id, updateProductDto);
+  }
 
-  // remove(id: number) {
-  //   return `This action removes a #${id} product`;
-  // }
+  remove(id: number) {
+    return this.repository.removeProduct(id);
+  }
 }
