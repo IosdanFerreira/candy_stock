@@ -132,21 +132,21 @@ model PaymentMethod {
 }
 
 model Seller {
-  id            Int       @id @default(autoincrement())
-  name          String
-  admssion_date DateTime
-  cpf           String    @unique
-  birth_date    String?
-  cep           String?
-  street_name   String?
-  house_number  String?
-  city_name     String?
-  neighborhood  String?
-  state         String?
-  phone_1       String?
-  phone_2       String?
-  obs           String?
-  dimissal_date DateTime?
+  id             Int     @id @default(autoincrement())
+  name           String
+  admission_date String
+  cpf            String  @unique
+  birth_date     String?
+  cep            String?
+  street_name    String?
+  house_number   Int?
+  city_name      String?
+  neighborhood   String?
+  state          String?
+  phone_1        String?
+  phone_2        String?
+  observation    String?
+  dismissal_date String?
 
   financial_transactions FinancialTransaction[]
 
@@ -157,24 +157,24 @@ model Seller {
 }
 
 model Client {
-  id                 Int      @id @default(autoincrement())
+  id                 Int     @id @default(autoincrement())
   name               String
-  email              String   @unique
-  cpf                String?  @unique
-  cnpj               String   @unique
-  state_registration String   @unique
-  registration_date  DateTime
+  email              String  @unique
+  cpf                String? @unique
+  cnpj               String  @unique
+  state_registration String  @unique
+  registration_date  String
   birth_date         String?
   cep                String?
   street_name        String?
-  house_number       String?
+  house_number       Int?
   city_name          String?
   neighborhood       String?
   state              String?
   phone_1            String
   phone_2            String?
   whatsapp           String?
-  obs                String?
+  observation        String?
 
   FinancialTransaction FinancialTransaction[]
 
@@ -203,7 +203,7 @@ model Production {
   user_id Int
   user    User @relation(fields: [user_id], references: [id])
 
-  obs String?
+  observation String?
 
   production_steps ProductionSteps[]
 
