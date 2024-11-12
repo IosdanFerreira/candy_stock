@@ -1,15 +1,23 @@
-// repositories/product.repository.ts
+// Nest
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateProductDto } from '../dto/create_product.dto';
-import { ProductEntity } from '../entities/product.entity';
-import { IProductRepository } from '../interfaces/product.repository.interface';
 
-import { filterDatabaseRecords } from 'src/common/utils/filter_database_record.utils';
-import { filterDatabaseRecordsCount } from 'src/common/utils/filter_database_record_count.utils';
-import { NotFoundError } from 'src/common/errors/types/not-found-error';
+// Prisma
+import { PrismaService } from 'src/prisma/prisma.service';
+import { Prisma } from '@prisma/client';
+
+// Entity
+import { ProductEntity } from '../entities/product.entity';
+
+// DTO
+import { CreateProductDto } from '../dto/create_product.dto';
 import { UpdateProductDto } from '../dto/update_product.dto';
+
+// Interfaces
+import { IProductRepository } from '../interfaces/product_repository.interface';
 import { IDefaultRepositoryResponse } from 'src/common/interfaces/default_repository_response.interface';
+
+// Errors
+import { NotFoundError } from 'src/common/errors/types/not-found-error';
 
 @Injectable()
 export class ProductRepository implements IProductRepository {
@@ -23,7 +31,7 @@ export class ProductRepository implements IProductRepository {
   }
 
   // Método que busca todos os produtos
-  async findAllProducts(
+  async getAllProducts(
     skip: number,
     limit: number,
     orderBy: 'asc' | 'desc',
@@ -51,31 +59,32 @@ export class ProductRepository implements IProductRepository {
     limit: number,
     orderBy: 'asc' | 'desc',
   ): Promise<ProductEntity[]> {
-    const filteredProducts: ProductEntity[] = await filterDatabaseRecords({
-      prismaClient: this.prisma,
-      databaseTableName: 'products',
-      searchTerm: search,
-      limit,
-      skip,
-      orderBy,
-    });
+    const filteredProducts: ProductEntity[] = await this.prisma.$queryRaw`
+    SELECT * FROM products
+    WHERE unaccent("name") ILIKE unaccent('%' || ${search} || '%')
+      OR unaccent("description") ILIKE unaccent('%' || ${search} || '%')
+    ORDER BY "id" ${Prisma.raw(orderBy.toUpperCase())}
+    LIMIT ${Prisma.raw(limit.toString())} OFFSET ${Prisma.raw(skip.toString())};
+    `;
 
     return filteredProducts;
   }
 
   // Método que busca a quantidade total de produtos levando em consideração o termo informado no campo de busca
   async getFilteredProductCount(search: string): Promise<number> {
-    const filteredProductsCount: number = await filterDatabaseRecordsCount({
-      prismaClient: this.prisma,
-      databaseTableName: 'products',
-      searchTerm: search,
-    });
+    const query = await this.prisma.$queryRaw`
+    SELECT COUNT(*) as count FROM products
+    WHERE unaccent("name") ILIKE unaccent('%' || ${search} || '%')
+      OR unaccent("description") ILIKE unaccent('%' || ${search} || '%')
+    `;
+
+    const filteredProductsCount: number = Number(query[0]?.count || 0);
 
     return filteredProductsCount;
   }
 
   // Método que busca o produto baseado no ID informado
-  async findProductByID(id: number): Promise<ProductEntity> {
+  async getProductByID(id: number): Promise<ProductEntity> {
     const product: ProductEntity = await this.prisma.product.findUnique({
       where: {
         id,
@@ -115,7 +124,7 @@ export class ProductRepository implements IProductRepository {
   }
 
   // Método que remove o produto do banco de dados
-  async removeProduct(id: number): Promise<IDefaultRepositoryResponse> {
+  async deleteProduct(id: number): Promise<IDefaultRepositoryResponse> {
     const existingProduct: ProductEntity = await this.prisma.product.findUnique(
       {
         where: {

@@ -1,3 +1,4 @@
+// Nest
 import {
   Controller,
   Post,
@@ -8,9 +9,13 @@ import {
   Put,
   Delete,
 } from '@nestjs/common';
-import { ProductService } from './product.service';
+
+// DTO
 import { CreateProductDto } from './dto/create_product.dto';
 import { UpdateProductDto } from './dto/update_product.dto';
+
+// Resource
+import { ProductService } from './product.service';
 
 @Controller('products')
 export class ProductController {
@@ -25,10 +30,10 @@ export class ProductController {
   findAll(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
-    @Query('order_by') order_by: 'asc' | 'desc',
+    @Query('order_by') orderBy: 'asc' | 'desc',
     @Query('search') search?: string,
   ) {
-    return this.productService.findAll(page, limit, order_by, search);
+    return this.productService.findAll(page, limit, orderBy, search);
   }
 
   @Get(':id')
@@ -37,12 +42,12 @@ export class ProductController {
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
-    return this.productService.update(+id, updateProductDto);
+  update(@Param('id') id: number, @Body() updateProductDto: UpdateProductDto) {
+    return this.productService.update(id, updateProductDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.productService.remove(+id);
+  remove(@Param('id') id: number) {
+    return this.productService.remove(id);
   }
 }

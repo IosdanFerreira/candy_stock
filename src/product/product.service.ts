@@ -1,12 +1,20 @@
+// Nest
 import { Injectable } from '@nestjs/common';
+
+// DTO
 import { CreateProductDto } from './dto/create_product.dto';
-import { ProductRepository } from './repositories/product.repository';
-import { paginationMeta } from 'src/common/utils/pagination_meta.utils';
 import { UpdateProductDto } from './dto/update_product.dto';
+
+// Repository
+import { ProductRepository } from './repositories/product.repository';
+
+// Utils
+import { paginationMeta } from 'src/common/utils/pagination_meta.utils';
 
 @Injectable()
 export class ProductService {
   constructor(private readonly repository: ProductRepository) {}
+
   create(createProductDto: CreateProductDto) {
     return this.repository.createProduct(createProductDto);
   }
@@ -47,11 +55,7 @@ export class ProductService {
 
     const totalItem = await this.repository.getTotalProductCount();
 
-    const products = await this.repository.findAllProducts(
-      skip,
-      limit,
-      orderBy,
-    );
+    const products = await this.repository.getAllProducts(skip, limit, orderBy);
 
     const pagination = paginationMeta(totalItem, page, limit);
 
@@ -64,7 +68,7 @@ export class ProductService {
   }
 
   findOne(id: number) {
-    return this.repository.findProductByID(id);
+    return this.repository.getProductByID(id);
   }
 
   update(id: number, updateProductDto: UpdateProductDto) {
@@ -72,6 +76,6 @@ export class ProductService {
   }
 
   remove(id: number) {
-    return this.repository.removeProduct(id);
+    return this.repository.deleteProduct(id);
   }
 }

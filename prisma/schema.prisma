@@ -61,7 +61,7 @@ model Product {
 
 model Warehouse {
   id                Int      @id @default(autoincrement())
-  acronym           String
+  acronym           String   @unique
   description       String
   registration_date DateTime
   capacity          Int
