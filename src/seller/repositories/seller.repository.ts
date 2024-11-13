@@ -74,6 +74,10 @@ export class SellerRepository implements ISellerRepository {
       where: { id },
     });
 
+    if (!seller) {
+      throw new NotFoundError('Nenhum registro com esse ID foi encontrado');
+    }
+
     return seller;
   }
 

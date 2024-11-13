@@ -7,7 +7,7 @@ export class ClientEntity implements Client {
   cpf: string;
   cnpj: string;
   state_registration: string;
-  registration_date: Date;
+  registration_date: string;
   birth_date: string;
   cep: string;
   street_name: string;

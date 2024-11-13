@@ -24,7 +24,7 @@ export class SellerService {
       const filteredSellerCount =
         await this.repository.getFilteredSellerCount(search);
 
-      const filteredProducts = await this.repository.getFilteredSellers(
+      const filteredSellers = await this.repository.getFilteredSellers(
         search,
         skip,
         limit,
@@ -38,7 +38,7 @@ export class SellerService {
       );
 
       return {
-        data: filteredProducts,
+        data: filteredSellers,
         meta: {
           ...filteredPagination,
           search,
