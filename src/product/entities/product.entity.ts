@@ -9,6 +9,7 @@ export class ProductEntity implements Product {
   priority_order: number;
   icms: boolean;
   observations: string | null;
+  active_status: boolean;
   created_at: Date;
   updated_at: Date;
 }

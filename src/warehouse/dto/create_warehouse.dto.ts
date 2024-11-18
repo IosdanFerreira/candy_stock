@@ -1,4 +1,11 @@
-import { IsInt, IsNotEmpty, IsString, Min } from 'class-validator';
+import {
+  IsInt,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 
 export class CreateWarehouseDto {
   @IsString({ message: 'Este campo deve ser do tipo string' })
@@ -7,11 +14,15 @@ export class CreateWarehouseDto {
 
   @IsString({ message: 'Este campo deve ser do tipo string' })
   @IsNotEmpty({ message: 'Este campo é obrigatório' })
+  name: string;
+
+  @IsString({ message: 'Este campo deve ser do tipo string' })
+  @IsNotEmpty({ message: 'Este campo é obrigatório' })
   description: string;
 
   @IsString({ message: 'Este campo deve ser do tipo string' })
   @IsNotEmpty({ message: 'Este campo é obrigatório' })
-  registration_date: string;
+  register_code: string;
 
   @IsInt({ message: 'Este campo deve ser do tipo number' })
   @Min(1)
@@ -22,4 +33,28 @@ export class CreateWarehouseDto {
   @Min(0)
   @IsNotEmpty({ message: 'Este campo é obrigatório' })
   stored: number;
+
+  @IsString({ message: 'Este campo deve ser do tipo string' })
+  @IsOptional()
+  cep: string;
+
+  @IsString({ message: 'Este campo deve ser do tipo string' })
+  @IsOptional()
+  street_name: string;
+
+  @IsNumber({}, { message: 'Este campo deve ser do tipo string' })
+  @IsOptional()
+  house_number: number;
+
+  @IsString({ message: 'Este campo deve ser do tipo string' })
+  @IsOptional()
+  city_name: string;
+
+  @IsString({ message: 'Este campo deve ser do tipo string' })
+  @IsOptional()
+  neighborhood: string;
+
+  @IsString({ message: 'Este campo deve ser do tipo string' })
+  @IsOptional()
+  state: string;
 }

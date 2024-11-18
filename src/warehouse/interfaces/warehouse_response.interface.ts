@@ -1,12 +1,10 @@
-import { Warehouse } from '@prisma/client';
+import { ProductEntity } from 'src/product/entities/product.entity';
 
-export class WarehouseEntity implements Warehouse {
+export interface IWarehouseResponse {
   id: number;
   acronym: string;
   name: string;
-  name_unaccented: string;
-  description: string;
-  description_unaccented: string;
+  description: string | null;
   register_code: string;
   capacity: number;
   stored: number;
@@ -16,7 +14,10 @@ export class WarehouseEntity implements Warehouse {
   city_name: string;
   neighborhood: string;
   state: string;
-  deleted: boolean;
+  deleted?: boolean;
+  stored_products: {
+    product: ProductEntity;
+  }[];
   created_at: Date;
   updated_at: Date;
 }

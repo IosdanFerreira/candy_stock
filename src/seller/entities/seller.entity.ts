@@ -16,6 +16,7 @@ export class SellerEntity implements Seller {
   phone_2: string;
   observation: string;
   dismissal_date: string;
+  active_status: boolean;
   created_at: Date;
   updated_at: Date;
 }

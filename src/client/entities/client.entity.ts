@@ -19,6 +19,7 @@ export class ClientEntity implements Client {
   phone_2: string;
   whatsapp: string;
   observation: string;
+  active_status: boolean;
   created_at: Date;
   updated_at: Date;
 }

@@ -27,8 +27,9 @@ model User {
 }
 
 model Role {
-  id        Int    @id @default(autoincrement())
-  role_name String @unique
+  id            Int     @id @default(autoincrement())
+  role_name     String  @unique
+  active_status Boolean @default(true)
 
   users User[]
 
@@ -47,6 +48,7 @@ model Product {
   priority_order Int
   icms           Boolean
   observations   String?
+  active_status  Boolean @default(true)
 
   warehouse_prodcts      WarehouseProduct[]
   financial_transactions FinancialTransaction[]
@@ -60,14 +62,24 @@ model Product {
 }
 
 model Warehouse {
-  id                Int      @id @default(autoincrement())
-  acronym           String   @unique
-  description       String
-  registration_date DateTime
-  capacity          Int
-  stored            Int
+  id                     Int     @id @default(autoincrement())
+  acronym                String  @unique
+  name                   String
+  name_unaccented        String
+  description            String
+  description_unaccented String
+  register_code          String  @unique
+  capacity               Int
+  stored                 Int
+  cep                    String?
+  street_name            String?
+  house_number           Int?
+  city_name              String?
+  neighborhood           String?
+  state                  String?
+  deleted                Boolean @default(false)
 
-  warehouse_prodcts       WarehouseProduct[]
+  stored_products         WarehouseProduct[]
   productions             Production[]       @relation("production_location")
   destination_productions Production[]       @relation("production_destination")
 
@@ -119,9 +131,10 @@ model FinancialTransaction {
 }
 
 model PaymentMethod {
-  id          Int     @id @default(autoincrement())
-  name        String
-  observation String?
+  id            Int     @id @default(autoincrement())
+  name          String
+  observation   String?
+  active_status Boolean @default(true)
 
   financial_transactions FinancialTransaction[]
 
@@ -147,6 +160,7 @@ model Seller {
   phone_2        String?
   observation    String?
   dismissal_date String?
+  active_status  Boolean @default(true)
 
   financial_transactions FinancialTransaction[]
 
@@ -175,6 +189,7 @@ model Client {
   phone_2            String?
   whatsapp           String?
   observation        String?
+  active_status      Boolean @default(true)
 
   FinancialTransaction FinancialTransaction[]
 
@@ -205,6 +220,8 @@ model Production {
 
   observation String?
 
+  active_status Boolean @default(true)
+
   production_steps ProductionSteps[]
 
   created_at DateTime @default(now())
@@ -219,9 +236,10 @@ model ProductionSteps {
   production_id Int
   production    Production @relation(fields: [production_id], references: [id])
 
-  step_order  Int
-  description String
-  status      String @default("Pending")
+  step_order        Int
+  description       String
+  production_status String  @default("Pending")
+  active_status     Boolean @default(true)
 
   ProductionResponsibility ProductionResponsibility[]
 
@@ -239,7 +257,9 @@ model Alert {
 
   alert_type String
   message    String
-  is_read    Boolean @default(false)
+
+  is_read       Boolean @default(false)
+  active_status Boolean @default(true)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -252,6 +272,7 @@ model ProductionResponsibility {
   production_step_id  Int
   responsible_user_id Int
   deadline            DateTime?
+  active_status       Boolean   @default(true)
 
   production_step  ProductionSteps @relation(fields: [production_step_id], references: [id])
   responsible_user User            @relation(fields: [responsible_user_id], references: [id])

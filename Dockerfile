@@ -1,8 +1,11 @@
 # Versão do node utilizado no projeto 
-FROM node:lts-alpine
+FROM node:18-alpine
 
 # Instala o bash
-RUN apk add --no-cache bash && npm install -g @nestjs/cli
+RUN apk add --no-cache bash
+
+# Instala o @nestjs/cli com dependências de peer para evitar erros de versão
+RUN npm install -g @nestjs/cli --verbose
 
 # Muda para o usuário root para as próximas operações
 USER root

@@ -1,23 +1,21 @@
-// Entity
-import { WarehouseEntity } from '../entities/warehouse.entity';
-
 // DTO
 import { CreateWarehouseDto } from '../dto/create_warehouse.dto';
 import { UpdateWarehouseDto } from '../dto/update_warehouse.dto';
 
-// Repository
+// Interfaces
 import { IDefaultRepositoryResponse } from 'src/common/interfaces/default_repository_response.interface';
+import { IWarehouseResponse } from './warehouse_response.interface';
 
 export interface IWarehouseRepository {
   createWarehouse(
     createWarehouseDto: CreateWarehouseDto,
-  ): Promise<WarehouseEntity>;
+  ): Promise<IWarehouseResponse>;
 
   getAllWarehouses(
     skip: number,
     limit: number,
     orderBy: 'asc' | 'desc',
-  ): Promise<WarehouseEntity[]>;
+  ): Promise<IWarehouseResponse[]>;
 
   getTotalWarehouseCount(): Promise<number>;
 
@@ -26,16 +24,16 @@ export interface IWarehouseRepository {
     skip: number,
     limit: number,
     orderBy: 'asc' | 'desc',
-  ): Promise<WarehouseEntity[]>;
+  ): Promise<IWarehouseResponse[]>;
 
   getFilteredWarehouseCount(search: string): Promise<number>;
 
-  getWarehouseByID(id: number): Promise<WarehouseEntity>;
+  getWarehouseByID(id: number): Promise<IWarehouseResponse>;
 
   updateWarehouse(
     id: number,
     updateWarehouseDto: UpdateWarehouseDto,
-  ): Promise<WarehouseEntity>;
+  ): Promise<IWarehouseResponse>;
 
   deleteWarehouse(id: number): Promise<IDefaultRepositoryResponse>;
 }
