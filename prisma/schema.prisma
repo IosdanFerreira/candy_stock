@@ -27,9 +27,9 @@ model User {
 }
 
 model Role {
-  id            Int     @id @default(autoincrement())
-  role_name     String  @unique
-  active_status Boolean @default(true)
+  id        Int     @id @default(autoincrement())
+  role_name String  @unique
+  deleted   Boolean @default(false)
 
   users User[]
 
@@ -101,6 +101,8 @@ model WarehouseProduct {
 
   quantity Int
 
+  deleted Boolean @default(false)
+
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
@@ -134,10 +136,10 @@ model FinancialTransaction {
 }
 
 model PaymentMethod {
-  id            Int     @id @default(autoincrement())
-  name          String
-  observation   String?
-  active_status Boolean @default(true)
+  id          Int     @id @default(autoincrement())
+  name        String
+  observation String?
+  deleted     Boolean @default(false)
 
   financial_transactions FinancialTransaction[]
 
@@ -193,7 +195,7 @@ model Client {
   phone_2           String?
   whatsapp          String?
   observation       String?
-  active_status     Boolean @default(true)
+  deleted           Boolean @default(false)
 
   FinancialTransaction FinancialTransaction[]
 
@@ -224,7 +226,7 @@ model Production {
 
   observation String?
 
-  active_status Boolean @default(true)
+  deleted Boolean @default(false)
 
   production_steps ProductionSteps[]
 
@@ -243,7 +245,7 @@ model ProductionSteps {
   step_order        Int
   description       String
   production_status String  @default("Pending")
-  active_status     Boolean @default(true)
+  deleted           Boolean @default(false)
 
   ProductionResponsibility ProductionResponsibility[]
 
@@ -262,8 +264,8 @@ model Alert {
   alert_type String
   message    String
 
-  is_read       Boolean @default(false)
-  active_status Boolean @default(true)
+  is_read Boolean @default(false)
+  deleted Boolean @default(false)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -276,7 +278,7 @@ model ProductionResponsibility {
   production_step_id  Int
   responsible_user_id Int
   deadline            DateTime?
-  active_status       Boolean   @default(true)
+  deleted             Boolean   @default(false)
 
   production_step  ProductionSteps @relation(fields: [production_step_id], references: [id])
   responsible_user User            @relation(fields: [responsible_user_id], references: [id])

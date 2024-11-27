@@ -1,9 +1,6 @@
-import { Client } from '@prisma/client';
-
-export class ClientEntity implements Client {
+export interface IClientResponse {
   id: number;
   name: string;
-  name_unaccented: string;
   email: string;
   cpf: string;
   cnpj: string;
@@ -19,7 +16,7 @@ export class ClientEntity implements Client {
   phone_2: string;
   whatsapp: string;
   observation: string;
-  deleted: boolean;
+  FinancialTransaction: any[];
   created_at: Date;
   updated_at: Date;
 }

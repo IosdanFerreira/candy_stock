@@ -78,16 +78,14 @@ export class ClientService {
   }
 
   async updateClient(id: number, updateClientDto: UpdateClientDto) {
-    const clientAlreadyExist = await this.repository.findByID(id);
-
-    if (!clientAlreadyExist) {
-      throw new NotFoundError('Nenhum cliente com esse ID foi encontrado');
-    }
+    await this.getClientByID(id);
 
     return await this.repository.update(id, updateClientDto);
   }
 
   async deleteClient(id: number) {
+    await this.getClientByID(id);
+
     return await this.repository.delete(id);
   }
 }

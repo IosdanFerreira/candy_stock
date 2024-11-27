@@ -3,48 +3,88 @@ import { IClientRepository } from '../interfaces/client_repository.interface';
 import { IDefaultRepositoryResponse } from 'src/common/interfaces/default_repository_response.interface';
 import { CreateClientDto } from '../dto/create_client.dto';
 import { UpdateClientDto } from '../dto/update_client.dto';
-import { ClientEntity } from '../entities/client.entity';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { NotFoundError } from 'src/common/errors/types/not-found-error';
 import { removeAccents } from 'src/common/utils/remove_accents.utils';
+import { IClientResponse } from '../entities/client_response.interface';
 
 @Injectable()
 export class ClientRepository implements IClientRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(createClientDto: CreateClientDto): Promise<ClientEntity> {
-    const client = await this.prisma.client.create({
+  async create(createClientDto: CreateClientDto): Promise<IClientResponse> {
+    return await this.prisma.client.create({
       data: {
         ...createClientDto,
         name_unaccented: removeAccents(createClientDto.name),
       },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        cpf: true,
+        cnpj: true,
+        registration_date: true,
+        birth_date: true,
+        cep: true,
+        street_name: true,
+        house_number: true,
+        city_name: true,
+        neighborhood: true,
+        state: true,
+        phone_1: true,
+        phone_2: true,
+        whatsapp: true,
+        observation: true,
         FinancialTransaction: true,
+        created_at: true,
+        updated_at: true,
       },
     });
-
-    return client;
   }
 
   async findAll(
     skip: number,
     limit: number,
     orderBy: 'asc' | 'desc',
-  ): Promise<ClientEntity[]> {
-    const allClients = await this.prisma.client.findMany({
+  ): Promise<IClientResponse[]> {
+    return await this.prisma.client.findMany({
+      where: {
+        deleted: false,
+      },
       skip,
       take: limit,
       orderBy: { id: orderBy },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        cpf: true,
+        cnpj: true,
+        registration_date: true,
+        birth_date: true,
+        cep: true,
+        street_name: true,
+        house_number: true,
+        city_name: true,
+        neighborhood: true,
+        state: true,
+        phone_1: true,
+        phone_2: true,
+        whatsapp: true,
+        observation: true,
         FinancialTransaction: true,
+        created_at: true,
+        updated_at: true,
       },
     });
-
-    return allClients;
   }
 
   async countAll(): Promise<number> {
-    const count = await this.prisma.client.count();
+    const count = await this.prisma.client.count({
+      where: {
+        deleted: false,
+      },
+    });
 
     return count;
   }
@@ -54,8 +94,8 @@ export class ClientRepository implements IClientRepository {
     skip: number,
     limit: number,
     orderBy: 'asc' | 'desc',
-  ): Promise<ClientEntity[]> {
-    const allFilteredClients = await this.prisma.client.findMany({
+  ): Promise<IClientResponse[]> {
+    return await this.prisma.client.findMany({
       where: {
         OR: [
           {
@@ -83,16 +123,36 @@ export class ClientRepository implements IClientRepository {
             },
           },
         ],
+        AND: {
+          deleted: false,
+        },
       },
       skip,
       take: limit,
       orderBy: { id: orderBy },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        cpf: true,
+        cnpj: true,
+        registration_date: true,
+        birth_date: true,
+        cep: true,
+        street_name: true,
+        house_number: true,
+        city_name: true,
+        neighborhood: true,
+        state: true,
+        phone_1: true,
+        phone_2: true,
+        whatsapp: true,
+        observation: true,
         FinancialTransaction: true,
+        created_at: true,
+        updated_at: true,
       },
     });
-
-    return allFilteredClients;
   }
 
   async countFiltered(search: string): Promise<number> {
@@ -124,17 +184,42 @@ export class ClientRepository implements IClientRepository {
             },
           },
         ],
+        AND: {
+          deleted: false,
+        },
       },
     });
 
     return allFilteredClientsCount;
   }
 
-  async findByID(id: number): Promise<ClientEntity> {
+  async findByID(id: number): Promise<IClientResponse> {
     return await this.prisma.client.findUnique({
-      where: { id },
-      include: {
+      where: {
+        id,
+        deleted: false,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        cpf: true,
+        cnpj: true,
+        registration_date: true,
+        birth_date: true,
+        cep: true,
+        street_name: true,
+        house_number: true,
+        city_name: true,
+        neighborhood: true,
+        state: true,
+        phone_1: true,
+        phone_2: true,
+        whatsapp: true,
+        observation: true,
         FinancialTransaction: true,
+        created_at: true,
+        updated_at: true,
       },
     });
   }
@@ -142,30 +227,50 @@ export class ClientRepository implements IClientRepository {
   async update(
     id: number,
     updateClientDto: UpdateClientDto,
-  ): Promise<ClientEntity> {
+  ): Promise<IClientResponse> {
     return await this.prisma.client.update({
-      where: { id },
+      where: {
+        id,
+        deleted: false,
+      },
       data: {
         ...updateClientDto,
         name_unaccented: removeAccents(updateClientDto.name),
       },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        cpf: true,
+        cnpj: true,
+        registration_date: true,
+        birth_date: true,
+        cep: true,
+        street_name: true,
+        house_number: true,
+        city_name: true,
+        neighborhood: true,
+        state: true,
+        phone_1: true,
+        phone_2: true,
+        whatsapp: true,
+        observation: true,
         FinancialTransaction: true,
+        created_at: true,
+        updated_at: true,
       },
     });
   }
 
   async delete(id: number): Promise<IDefaultRepositoryResponse> {
-    const clientAlreadyExist = await this.prisma.client.findUnique({
-      where: { id },
-    });
-
-    if (!clientAlreadyExist) {
-      throw new NotFoundError('Nenhum registro com esse ID foi encontrado');
-    }
-
-    await this.prisma.client.delete({
-      where: { id },
+    await this.prisma.client.update({
+      where: {
+        id,
+        deleted: false,
+      },
+      data: {
+        deleted: true,
+      },
     });
 
     return {

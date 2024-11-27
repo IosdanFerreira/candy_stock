@@ -8,8 +8,8 @@ import {
   Put,
 } from '@nestjs/common';
 import { RoleService } from './role.service';
-import { CreateRoleDto } from './dto/create-role.dto';
-import { UpdateRoleDto } from './dto/update-role.dto';
+import { CreateRoleDto } from './dto/create_role.dto';
+import { UpdateRoleDto } from './dto/update_role.dto';
 
 @Controller('roles')
 export class RoleController {
@@ -17,26 +17,26 @@ export class RoleController {
 
   @Post()
   create(@Body() createRoleDto: CreateRoleDto) {
-    return this.roleService.create(createRoleDto);
+    return this.roleService.registerRole(createRoleDto);
   }
 
   @Get()
   findAll() {
-    return this.roleService.findAll();
+    return this.roleService.getAllRoles();
   }
 
   @Get(':id')
   findOne(@Param('id') id: number) {
-    return this.roleService.findOne(id);
+    return this.roleService.getRoleByID(id);
   }
 
   @Put(':id')
   update(@Param('id') id: number, @Body() updateRoleDto: UpdateRoleDto) {
-    return this.roleService.update(id, updateRoleDto);
+    return this.roleService.updateRole(id, updateRoleDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: number) {
-    return this.roleService.remove(id);
+    return this.roleService.deleteRole(id);
   }
 }

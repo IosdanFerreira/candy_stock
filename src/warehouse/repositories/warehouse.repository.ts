@@ -13,9 +13,6 @@ import { IWarehouseRepository } from '../interfaces/warehouse_repository.interfa
 import { IDefaultRepositoryResponse } from 'src/common/interfaces/default_repository_response.interface';
 import { IWarehouseResponse } from '../interfaces/warehouse_response.interface';
 
-// Errors
-import { NotFoundError } from 'src/common/errors/types/not-found-error';
-
 // Utils
 import { removeAccents } from 'src/common/utils/remove_accents.utils';
 
@@ -32,10 +29,10 @@ export class WarehouseRepository implements IWarehouseRepository {
     return registerCode;
   }
 
-  async createWarehouse(
+  async create(
     createWarehouseDto: CreateWarehouseDto,
   ): Promise<IWarehouseResponse> {
-    const warehouse = await this.prisma.warehouse.create({
+    return await this.prisma.warehouse.create({
       data: {
         ...createWarehouseDto,
         name_unaccented: removeAccents(createWarehouseDto.name),
@@ -74,16 +71,14 @@ export class WarehouseRepository implements IWarehouseRepository {
         updated_at: true,
       },
     });
-
-    return warehouse;
   }
 
-  async getAllWarehouses(
+  async findAll(
     skip: number,
     limit: number,
     orderBy: 'asc' | 'desc',
   ): Promise<IWarehouseResponse[]> {
-    const allWarehouses = await this.prisma.warehouse.findMany({
+    return await this.prisma.warehouse.findMany({
       where: {
         deleted: false,
       },
@@ -120,102 +115,95 @@ export class WarehouseRepository implements IWarehouseRepository {
       take: limit,
       orderBy: { id: orderBy },
     });
-
-    return allWarehouses;
   }
 
-  async getTotalWarehouseCount(): Promise<number> {
-    const count: number = await this.prisma.warehouse.count({
+  async countAll(): Promise<number> {
+    return await this.prisma.warehouse.count({
       where: {
         deleted: false,
       },
     });
-
-    return count;
   }
 
-  async getFilteredWarehouses(
+  async findAllFiltered(
     search: string,
     skip: number,
     limit: number,
     orderBy: 'asc' | 'desc',
   ): Promise<IWarehouseResponse[]> {
-    const filteredWarehouses: IWarehouseResponse[] =
-      await this.prisma.warehouse.findMany({
-        where: {
-          OR: [
-            {
-              name: {
-                contains: search,
-                mode: 'insensitive',
-              },
-            },
-            {
-              name_unaccented: {
-                contains: search,
-                mode: 'insensitive',
-              },
-            },
-            {
-              description: {
-                contains: search,
-                mode: 'insensitive',
-              },
-            },
-            {
-              description_unaccented: {
-                contains: search,
-                mode: 'insensitive',
-              },
-            },
-            {
-              acronym: {
-                contains: search,
-                mode: 'insensitive',
-              },
-            },
-          ],
-          AND: { deleted: false },
-        },
-        select: {
-          id: true,
-          acronym: true,
-          name: true,
-          description: true,
-          register_code: true,
-          capacity: true,
-          stored: true,
-          cep: true,
-          street_name: true,
-          house_number: true,
-          city_name: true,
-          neighborhood: true,
-          state: true,
-          deleted: false,
-          stored_products: {
-            where: {
-              quantity: {
-                gt: 0,
-              },
-            },
-            select: {
-              product: true,
-              quantity: true,
+    return await this.prisma.warehouse.findMany({
+      where: {
+        OR: [
+          {
+            name: {
+              contains: search,
+              mode: 'insensitive',
             },
           },
-          created_at: true,
-          updated_at: true,
+          {
+            name_unaccented: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+          {
+            description: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+          {
+            description_unaccented: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+          {
+            acronym: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+        ],
+        AND: { deleted: false },
+      },
+      select: {
+        id: true,
+        acronym: true,
+        name: true,
+        description: true,
+        register_code: true,
+        capacity: true,
+        stored: true,
+        cep: true,
+        street_name: true,
+        house_number: true,
+        city_name: true,
+        neighborhood: true,
+        state: true,
+        deleted: false,
+        stored_products: {
+          where: {
+            quantity: {
+              gt: 0,
+            },
+          },
+          select: {
+            product: true,
+            quantity: true,
+          },
         },
-        skip,
-        take: limit,
-        orderBy: { id: orderBy },
-      });
-
-    return filteredWarehouses;
+        created_at: true,
+        updated_at: true,
+      },
+      skip,
+      take: limit,
+      orderBy: { id: orderBy },
+    });
   }
 
-  async getFilteredWarehouseCount(search: string): Promise<number> {
-    const filteredWarehousesCount = await this.prisma.warehouse.count({
+  async countAllFiltered(search: string): Promise<number> {
+    return await this.prisma.warehouse.count({
       where: {
         OR: [
           {
@@ -252,185 +240,94 @@ export class WarehouseRepository implements IWarehouseRepository {
         AND: { deleted: false },
       },
     });
-
-    return filteredWarehousesCount;
   }
 
-  async getWarehouseByID(id: number): Promise<IWarehouseResponse> {
-    const warehouse: IWarehouseResponse =
-      await this.prisma.warehouse.findUnique({
-        where: {
-          id,
-          deleted: false,
-        },
-        select: {
-          id: true,
-          acronym: true,
-          name: true,
-          description: true,
-          register_code: true,
-          capacity: true,
-          stored: true,
-          cep: true,
-          street_name: true,
-          house_number: true,
-          city_name: true,
-          neighborhood: true,
-          state: true,
-          deleted: false,
-          stored_products: {
-            where: {
-              quantity: {
-                gt: 0,
-              },
-            },
-            select: {
-              product: true,
-              quantity: true,
+  async findByID(id: number): Promise<IWarehouseResponse> {
+    return await this.prisma.warehouse.findUnique({
+      where: {
+        id,
+        deleted: false,
+      },
+      select: {
+        id: true,
+        acronym: true,
+        name: true,
+        description: true,
+        register_code: true,
+        capacity: true,
+        stored: true,
+        cep: true,
+        street_name: true,
+        house_number: true,
+        city_name: true,
+        neighborhood: true,
+        state: true,
+        deleted: false,
+        stored_products: {
+          where: {
+            quantity: {
+              gt: 0,
             },
           },
-          created_at: true,
-          updated_at: true,
+          select: {
+            product: true,
+            quantity: true,
+          },
         },
-      });
-
-    if (!warehouse) {
-      throw new NotFoundError('Nenhum armazém com esse ID foi encontrado');
-    }
-
-    return warehouse;
+        created_at: true,
+        updated_at: true,
+      },
+    });
   }
 
-  async updateWarehouse(
+  async update(
     id: number,
     updateWarehouseDto: UpdateWarehouseDto,
   ): Promise<IWarehouseResponse> {
-    const existingWarehouse: IWarehouseResponse =
-      await this.prisma.warehouse.findUnique({
-        where: {
-          id,
-          deleted: false,
-        },
-        select: {
-          id: true,
-          acronym: true,
-          name: true,
-          description: true,
-          register_code: true,
-          capacity: true,
-          stored: true,
-          cep: true,
-          street_name: true,
-          house_number: true,
-          city_name: true,
-          neighborhood: true,
-          state: true,
-          deleted: false,
-          stored_products: {
-            where: {
-              quantity: {
-                gt: 0,
-              },
-            },
-            select: {
-              product: true,
-              quantity: true,
+    return await this.prisma.warehouse.update({
+      where: {
+        id,
+        deleted: false,
+      },
+      data: { ...updateWarehouseDto },
+      select: {
+        id: true,
+        acronym: true,
+        name: true,
+        description: true,
+        register_code: true,
+        capacity: true,
+        stored: true,
+        cep: true,
+        street_name: true,
+        house_number: true,
+        city_name: true,
+        neighborhood: true,
+        state: true,
+        deleted: false,
+        stored_products: {
+          where: {
+            quantity: {
+              gt: 0,
             },
           },
-          created_at: true,
-          updated_at: true,
-        },
-      });
-
-    if (!existingWarehouse) {
-      throw new NotFoundError('Nenhum armazém com esse ID foi encontrado');
-    }
-
-    const updatingWarehouse: IWarehouseResponse =
-      await this.prisma.warehouse.update({
-        where: {
-          id,
-          deleted: false,
-        },
-        data: { ...updateWarehouseDto },
-        select: {
-          id: true,
-          acronym: true,
-          name: true,
-          description: true,
-          register_code: true,
-          capacity: true,
-          stored: true,
-          cep: true,
-          street_name: true,
-          house_number: true,
-          city_name: true,
-          neighborhood: true,
-          state: true,
-          deleted: false,
-          stored_products: {
-            where: {
-              quantity: {
-                gt: 0,
-              },
-            },
-            select: {
-              product: true,
-              quantity: true,
-            },
+          select: {
+            product: true,
+            quantity: true,
           },
-          created_at: true,
-          updated_at: true,
         },
-      });
-
-    return updatingWarehouse;
+        created_at: true,
+        updated_at: true,
+      },
+    });
   }
 
-  async deleteWarehouse(id: number): Promise<IDefaultRepositoryResponse> {
-    const existingWarehouse: IWarehouseResponse =
-      await this.prisma.warehouse.findUnique({
-        where: {
-          id,
-          deleted: false,
-        },
-        select: {
-          id: true,
-          acronym: true,
-          name: true,
-          description: true,
-          register_code: true,
-          capacity: true,
-          stored: true,
-          cep: true,
-          street_name: true,
-          house_number: true,
-          city_name: true,
-          neighborhood: true,
-          state: true,
-          deleted: false,
-          stored_products: {
-            where: {
-              quantity: {
-                gt: 0,
-              },
-            },
-            select: {
-              product: true,
-              quantity: true,
-            },
-          },
-          created_at: true,
-          updated_at: true,
-        },
-      });
-
-    if (!existingWarehouse) {
-      throw new NotFoundError('Nenhum armazém com esse ID foi encontrado');
-    }
-
+  async delete(id: number): Promise<IDefaultRepositoryResponse> {
     await this.prisma.warehouse.update({
-      where: { id },
+      where: {
+        id,
+        deleted: false,
+      },
       data: {
         deleted: true,
       },
@@ -446,41 +343,43 @@ export class WarehouseRepository implements IWarehouseRepository {
     warehouseID: number,
     quantityChange: number,
   ) {
-    const updatedStoredQuantityOnWarehouse: IWarehouseResponse =
-      await this.prisma.warehouse.update({
-        where: { id: warehouseID },
-        data: { stored: { increment: quantityChange } },
-        select: {
-          id: true,
-          acronym: true,
-          name: true,
-          description: true,
-          register_code: true,
-          capacity: true,
-          stored: true,
-          cep: true,
-          street_name: true,
-          house_number: true,
-          city_name: true,
-          neighborhood: true,
-          state: true,
+    return await this.prisma.warehouse.update({
+      where: {
+        id: warehouseID,
+        AND: {
           deleted: false,
-          stored_products: {
-            where: {
-              quantity: {
-                gt: 0,
-              },
-            },
-            select: {
-              product: true,
-              quantity: true,
+        },
+      },
+      data: { stored: { increment: quantityChange } },
+      select: {
+        id: true,
+        acronym: true,
+        name: true,
+        description: true,
+        register_code: true,
+        capacity: true,
+        stored: true,
+        cep: true,
+        street_name: true,
+        house_number: true,
+        city_name: true,
+        neighborhood: true,
+        state: true,
+        deleted: false,
+        stored_products: {
+          where: {
+            quantity: {
+              gt: 0,
             },
           },
-          created_at: true,
-          updated_at: true,
+          select: {
+            product: true,
+            quantity: true,
+          },
         },
-      });
-
-    return updatedStoredQuantityOnWarehouse;
+        created_at: true,
+        updated_at: true,
+      },
+    });
   }
 }

@@ -1,30 +1,40 @@
 import { Injectable } from '@nestjs/common';
-import { CreateRoleDto } from './dto/create-role.dto';
-import { UpdateRoleDto } from './dto/update-role.dto';
+import { CreateRoleDto } from './dto/create_role.dto';
+import { UpdateRoleDto } from './dto/update_role.dto';
 import { RoleRepository } from 'src/role/repositories/role.repository';
-import { RoleEntity } from './entities/role.entity';
-import { DefaultRoleResponse } from './models/default-role-response.model';
+import { DefaultRoleResponse } from './interfaces/role_response.interface';
+import { NotFoundError } from 'src/common/errors/types/not-found-error';
 
 @Injectable()
 export class RoleService {
   constructor(private readonly repository: RoleRepository) {}
-  create(createRoleDto: CreateRoleDto): Promise<RoleEntity> {
-    return this.repository.createRole(createRoleDto);
+
+  async registerRole(createRoleDto: CreateRoleDto) {
+    return await this.repository.create(createRoleDto);
   }
 
-  findAll(): Promise<RoleEntity[]> {
-    return this.repository.findAllRoles();
+  async getAllRoles() {
+    return await this.repository.findAll();
   }
 
-  findOne(id: number): Promise<RoleEntity> {
-    return this.repository.findRoleById(id);
+  async getRoleByID(id: number) {
+    const role = await this.repository.findByID(id);
+
+    if (!role) {
+      throw new NotFoundError('Nenhuma permissão com esse ID foi encontrado');
+    }
+    return role;
   }
 
-  update(id: number, updateRoleDto: UpdateRoleDto): Promise<RoleEntity> {
-    return this.repository.updateRole(updateRoleDto, id);
+  async updateRole(id: number, updateRoleDto: UpdateRoleDto) {
+    await this.getRoleByID(id);
+
+    return await this.repository.update(id, updateRoleDto);
   }
 
-  remove(id: number): Promise<DefaultRoleResponse> {
-    return this.repository.removeRole(id);
+  async deleteRole(id: number): Promise<DefaultRoleResponse> {
+    await this.getRoleByID(id);
+
+    return await this.repository.delete(id);
   }
 }

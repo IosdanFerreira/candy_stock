@@ -23,7 +23,7 @@ export class WarehouseController {
 
   @Post()
   create(@Body() createWarehouseDto: CreateWarehouseDto) {
-    return this.warehouseService.create(createWarehouseDto);
+    return this.warehouseService.registerWarehouses(createWarehouseDto);
   }
 
   @Get()
@@ -33,12 +33,12 @@ export class WarehouseController {
     @Query('order_by') orderBy: 'asc' | 'desc',
     @Query('search') search?: string,
   ) {
-    return this.warehouseService.findAll(page, limit, orderBy, search);
+    return this.warehouseService.getAllWarehouses(page, limit, orderBy, search);
   }
 
   @Get(':id')
   findOne(@Param('id') id: number) {
-    return this.warehouseService.findOne(id);
+    return this.warehouseService.getWarehouseByID(id);
   }
 
   @Put(':id')
@@ -46,11 +46,11 @@ export class WarehouseController {
     @Param('id') id: number,
     @Body() updateWarehouseDto: UpdateWarehouseDto,
   ) {
-    return this.warehouseService.update(id, updateWarehouseDto);
+    return this.warehouseService.updateWarehouse(id, updateWarehouseDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: number) {
-    return this.warehouseService.remove(id);
+    return this.warehouseService.deleteWarehouse(id);
   }
 }

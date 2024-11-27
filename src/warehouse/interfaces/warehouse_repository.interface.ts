@@ -7,35 +7,33 @@ import { IDefaultRepositoryResponse } from 'src/common/interfaces/default_reposi
 import { IWarehouseResponse } from './warehouse_response.interface';
 
 export interface IWarehouseRepository {
-  createWarehouse(
-    createWarehouseDto: CreateWarehouseDto,
-  ): Promise<IWarehouseResponse>;
+  create(createWarehouseDto: CreateWarehouseDto): Promise<IWarehouseResponse>;
 
-  getAllWarehouses(
+  findAll(
     skip: number,
     limit: number,
     orderBy: 'asc' | 'desc',
   ): Promise<IWarehouseResponse[]>;
 
-  getTotalWarehouseCount(): Promise<number>;
+  countAll(): Promise<number>;
 
-  getFilteredWarehouses(
+  findAllFiltered(
     search: string,
     skip: number,
     limit: number,
     orderBy: 'asc' | 'desc',
   ): Promise<IWarehouseResponse[]>;
 
-  getFilteredWarehouseCount(search: string): Promise<number>;
+  countAllFiltered(search: string): Promise<number>;
 
-  getWarehouseByID(id: number): Promise<IWarehouseResponse>;
+  findByID(id: number): Promise<IWarehouseResponse>;
 
-  updateWarehouse(
+  update(
     id: number,
     updateWarehouseDto: UpdateWarehouseDto,
   ): Promise<IWarehouseResponse>;
 
-  deleteWarehouse(id: number): Promise<IDefaultRepositoryResponse>;
+  delete(id: number): Promise<IDefaultRepositoryResponse>;
 
   updateStoredQuantityOnWarehouse(
     warehouseID: number,

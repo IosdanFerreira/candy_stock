@@ -57,6 +57,9 @@ export class ProductRepository implements IProductRepository {
     orderBy: 'asc' | 'desc',
   ): Promise<IProductResponse[]> {
     const products: IProductResponse[] = await this.prisma.product.findMany({
+      where: {
+        deleted: false,
+      },
       skip,
       take: limit,
       orderBy: { id: orderBy },
@@ -86,7 +89,11 @@ export class ProductRepository implements IProductRepository {
 
   // Método que busca a quantidade total de produtos sem levar em consideração nenhum tipo de filtro
   async countAll(): Promise<number> {
-    const count: number = await this.prisma.product.count();
+    const count: number = await this.prisma.product.count({
+      where: {
+        deleted: false,
+      },
+    });
 
     return count;
   }
@@ -126,6 +133,9 @@ export class ProductRepository implements IProductRepository {
             },
           },
         ],
+        AND: {
+          deleted: false,
+        },
       },
       skip,
       take: limit,
@@ -184,6 +194,9 @@ export class ProductRepository implements IProductRepository {
             },
           },
         ],
+        AND: {
+          deleted: false,
+        },
       },
     });
 
@@ -195,6 +208,7 @@ export class ProductRepository implements IProductRepository {
     return await this.prisma.product.findUnique({
       where: {
         id,
+        deleted: false,
       },
       select: {
         id: true,
@@ -224,7 +238,10 @@ export class ProductRepository implements IProductRepository {
     updateProductDto: UpdateProductDto,
   ): Promise<IProductResponse> {
     return await this.prisma.product.update({
-      where: { id },
+      where: {
+        id,
+        deleted: false,
+      },
       data: {
         ...updateProductDto,
         name_unaccented: removeAccents(updateProductDto.name),
@@ -253,8 +270,14 @@ export class ProductRepository implements IProductRepository {
 
   // Método que remove o produto do banco de dados
   async delete(id: number): Promise<IDefaultRepositoryResponse> {
-    await this.prisma.product.delete({
-      where: { id },
+    await this.prisma.product.update({
+      where: {
+        id,
+        deleted: false,
+      },
+      data: {
+        deleted: true,
+      },
     });
 
     return {

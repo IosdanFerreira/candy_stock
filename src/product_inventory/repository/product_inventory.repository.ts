@@ -11,24 +11,21 @@ export class ProductInventoryRepository implements IProductInventoryRepository {
   async addProductToWarehouse(
     createProductInventoryDto: CreateProductInventoryDto,
   ): Promise<ProductInventory> {
-    const createdProductInventory = await this.prisma.warehouseProduct.create({
+    return await this.prisma.warehouseProduct.create({
       data: createProductInventoryDto,
     });
-
-    return createdProductInventory;
   }
 
   async getProductInventoryByID(productInventoryID: number) {
-    const productInventory = await this.prisma.warehouseProduct.findUnique({
+    return await this.prisma.warehouseProduct.findUnique({
       where: {
         id: productInventoryID,
+        deleted: false,
       },
       include: {
         warehouse: true,
         product: true,
       },
     });
-
-    return productInventory;
   }
 }

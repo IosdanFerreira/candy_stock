@@ -48,6 +48,9 @@ export class SellerRepository implements ISellerRepository {
     orderBy: 'asc' | 'desc',
   ): Promise<ISellerResponse[]> {
     return await this.prisma.seller.findMany({
+      where: {
+        deleted: false,
+      },
       skip,
       take: limit,
       orderBy: { id: orderBy },
@@ -77,7 +80,11 @@ export class SellerRepository implements ISellerRepository {
   }
 
   async countAll(): Promise<number> {
-    return await this.prisma.seller.count();
+    return await this.prisma.seller.count({
+      where: {
+        deleted: false,
+      },
+    });
   }
 
   async findAllFiltered(
@@ -108,6 +115,9 @@ export class SellerRepository implements ISellerRepository {
             },
           },
         ],
+        AND: {
+          deleted: false,
+        },
       },
       skip,
       take: limit,
@@ -160,13 +170,19 @@ export class SellerRepository implements ISellerRepository {
             },
           },
         ],
+        AND: {
+          deleted: false,
+        },
       },
     });
   }
 
   async findByID(id: number): Promise<ISellerResponse> {
     return await this.prisma.seller.findUnique({
-      where: { id },
+      where: {
+        id,
+        deleted: false,
+      },
       select: {
         id: true,
         name: true,
@@ -197,7 +213,10 @@ export class SellerRepository implements ISellerRepository {
     updateSellerDto: UpdateSellerDto,
   ): Promise<ISellerResponse> {
     return await this.prisma.seller.update({
-      where: { id },
+      where: {
+        id,
+        deleted: false,
+      },
       data: {
         ...updateSellerDto,
         name_unaccented: removeAccents(updateSellerDto.name),
@@ -228,8 +247,14 @@ export class SellerRepository implements ISellerRepository {
   }
 
   async delete(id: number): Promise<IDefaultRepositoryResponse> {
-    await this.prisma.seller.delete({
-      where: { id },
+    await this.prisma.seller.update({
+      where: {
+        id,
+        deleted: false,
+      },
+      data: {
+        deleted: true,
+      },
     });
 
     return {

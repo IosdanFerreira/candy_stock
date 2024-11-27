@@ -10,17 +10,22 @@ import { WarehouseRepository } from './repositories/warehouse.repository';
 
 // Utils
 import { paginationMeta } from 'src/common/utils/pagination_meta.utils';
+
+// Interfaces
 import { IWarehouseResponse } from './interfaces/warehouse_response.interface';
+
+// Errors
+import { NotFoundError } from 'src/common/errors/types/not-found-error';
 
 @Injectable()
 export class WarehouseService {
   constructor(private readonly repository: WarehouseRepository) {}
 
-  create(createWarehouseDto: CreateWarehouseDto) {
-    return this.repository.createWarehouse(createWarehouseDto);
+  async registerWarehouses(createWarehouseDto: CreateWarehouseDto) {
+    return await this.repository.create(createWarehouseDto);
   }
 
-  async findAll(
+  async getAllWarehouses(
     page: number = 1,
     limit: number = 50,
     orderBy: 'asc' | 'desc' = 'asc',
@@ -30,9 +35,9 @@ export class WarehouseService {
 
     if (search) {
       const filteredWarehousesCount =
-        await this.repository.getFilteredWarehouseCount(search);
+        await this.repository.countAllFiltered(search);
 
-      const filteredWarehouses = await this.repository.getFilteredWarehouses(
+      const filteredWarehouses = await this.repository.findAllFiltered(
         search,
         skip,
         limit,
@@ -53,13 +58,9 @@ export class WarehouseService {
         },
       };
     }
-    const count = await this.repository.getTotalWarehouseCount();
+    const count = await this.repository.countAll();
 
-    const warehouses = await this.repository.getAllWarehouses(
-      skip,
-      limit,
-      orderBy,
-    );
+    const warehouses = await this.repository.findAll(skip, limit, orderBy);
 
     const pagination = paginationMeta(count, page, limit);
 
@@ -71,25 +72,33 @@ export class WarehouseService {
     };
   }
 
-  findOne(id: number) {
-    return this.repository.getWarehouseByID(id);
+  async getWarehouseByID(id: number) {
+    const warehouse = await this.repository.findByID(id);
+
+    if (!warehouse) {
+      throw new NotFoundError('Nenhum armazém com esse ID foi encontrado');
+    }
+
+    return warehouse;
   }
 
-  update(id: number, updateWarehouseDto: UpdateWarehouseDto) {
-    return this.repository.updateWarehouse(id, updateWarehouseDto);
+  async updateWarehouse(id: number, updateWarehouseDto: UpdateWarehouseDto) {
+    await this.getWarehouseByID(id);
+
+    return await this.repository.update(id, updateWarehouseDto);
   }
 
-  remove(id: number) {
-    return this.repository.deleteWarehouse(id);
+  async deleteWarehouse(id: number) {
+    await this.getWarehouseByID(id);
+
+    return await this.repository.delete(id);
   }
 
   async checkWarehouseCapacity(
     warehouseID: number,
     quantityToBeStored: number,
   ): Promise<void> {
-    // Verifica se o armazém existe
-    const warehouse: IWarehouseResponse =
-      await this.repository.getWarehouseByID(warehouseID); // Reutiliza o método de busca
+    const warehouse = await this.getWarehouseByID(warehouseID);
 
     // verifica a capacidade disponível para armazenamento
     if (warehouse.stored + quantityToBeStored > warehouse.capacity) {
@@ -97,11 +106,13 @@ export class WarehouseService {
     }
   }
 
-  updateStoredQuantityOnWarehouse(
+  async updateStoredQuantityOnWarehouse(
     warehouseID: number,
     quantityChange: number,
   ): Promise<IWarehouseResponse> {
-    return this.repository.updateStoredQuantityOnWarehouse(
+    await this.getWarehouseByID(warehouseID);
+
+    return await this.repository.updateStoredQuantityOnWarehouse(
       warehouseID,
       quantityChange,
     );

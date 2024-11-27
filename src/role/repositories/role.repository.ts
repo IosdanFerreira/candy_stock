@@ -1,80 +1,75 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateRoleDto } from 'src/role/dto/create-role.dto';
-import { UpdateRoleDto } from '../dto/update-role.dto';
-import { NotFoundError } from 'src/common/errors/types/not-found-error';
-import { RoleEntity } from '../entities/role.entity';
-import { DefaultRoleResponse } from '../models/default-role-response.model';
+import { CreateRoleDto } from 'src/role/dto/create_role.dto';
+import { UpdateRoleDto } from '../dto/update_role.dto';
+import {
+  DefaultRoleResponse,
+  IRoleResponse,
+} from '../interfaces/role_response.interface';
+import { IRoleRepository } from '../interfaces/role_repository.interface';
 
 @Injectable()
-export class RoleRepository {
+export class RoleRepository implements IRoleRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createRole(createRoleDto: CreateRoleDto): Promise<RoleEntity> {
-    const role = await this.prisma.role.create({
+  async create(createRoleDto: CreateRoleDto): Promise<IRoleResponse> {
+    return await this.prisma.role.create({
       data: {
         role_name: createRoleDto.role_name,
       },
-    });
-
-    return role;
-  }
-
-  async updateRole(
-    updateRoleDto: UpdateRoleDto,
-    id: number,
-  ): Promise<RoleEntity> {
-    const existingRole = await this.prisma.role.findUnique({
-      where: { id },
-    });
-
-    if (!existingRole) {
-      throw new NotFoundError('Nenhum registro com esse ID foi encontrado');
-    }
-
-    const updatingRole = await this.prisma.role.update({
-      where: { id },
-      data: {
-        role_name: updateRoleDto.role_name,
+      select: {
+        id: true,
+        role_name: true,
+        created_at: true,
+        updated_at: true,
       },
     });
-
-    return updatingRole;
   }
 
-  async findAllRoles(): Promise<RoleEntity[]> {
-    const allRoles = await this.prisma.role.findMany({
+  async findAll(): Promise<IRoleResponse[]> {
+    return await this.prisma.role.findMany({
+      where: {
+        deleted: false,
+      },
       orderBy: {
         id: 'asc',
       },
     });
-
-    return allRoles;
   }
 
-  async findRoleById(role_id: number): Promise<RoleEntity> {
-    const role = await this.prisma.role.findUnique({
-      where: { id: role_id },
+  async findByID(role_id: number): Promise<IRoleResponse> {
+    return await this.prisma.role.findUnique({
+      where: {
+        id: role_id,
+        deleted: false,
+      },
     });
-
-    if (!role) {
-      throw new NotFoundError('Nenhum registro com esse ID foi encontrado');
-    }
-
-    return role;
   }
 
-  async removeRole(id: number): Promise<DefaultRoleResponse> {
-    const existingRole = await this.prisma.role.findUnique({
-      where: { id },
+  async update(
+    id: number,
+    updateRoleDto: UpdateRoleDto,
+  ): Promise<IRoleResponse> {
+    return await this.prisma.role.update({
+      where: {
+        id,
+        deleted: false,
+      },
+      data: {
+        role_name: updateRoleDto.role_name,
+      },
     });
+  }
 
-    if (!existingRole) {
-      throw new NotFoundError('Nenhum registro com esse ID foi encontrado');
-    }
-
-    await this.prisma.role.delete({
-      where: { id },
+  async delete(id: number): Promise<DefaultRoleResponse> {
+    await this.prisma.role.update({
+      where: {
+        id,
+        deleted: false,
+      },
+      data: {
+        deleted: true,
+      },
     });
 
     return {

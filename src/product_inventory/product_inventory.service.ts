@@ -22,7 +22,7 @@ export class ProductInventoryService {
 
     // Checa se o armazém e o produto existem
     await Promise.all([
-      await this.warehouseService.findOne(warehouse_id),
+      await this.warehouseService.getWarehouseByID(warehouse_id),
       await this.productService.getProductByID(product_id),
     ]);
 
