@@ -1,34 +1,34 @@
 import { IDefaultRepositoryResponse } from 'src/common/interfaces/default_repository_response.interface';
 import { CreateSellerDto } from '../dto/create_seller.dto';
-import { SellerEntity } from '../entities/seller.entity';
 import { UpdateSellerDto } from '../dto/update_seller.dto';
+import { ISellerResponse } from './seller_response.interface';
 
 export interface ISellerRepository {
-  createSeller(createSellerDto: CreateSellerDto): Promise<SellerEntity>;
+  create(createSellerDto: CreateSellerDto): Promise<ISellerResponse>;
 
-  getAllSellers(
+  findAll(
     skip: number,
     limit: number,
     orderBy: 'asc' | 'desc',
-  ): Promise<SellerEntity[]>;
+  ): Promise<ISellerResponse[]>;
 
-  getTotalSellerCount(): Promise<number>;
+  countAll(): Promise<number>;
 
-  getFilteredSellers(
+  findAllFiltered(
     search: string,
     skip: number,
     limit: number,
     orderBy: 'asc' | 'desc',
-  ): Promise<SellerEntity[]>;
+  ): Promise<ISellerResponse[]>;
 
-  getFilteredSellerCount(search: string): Promise<number>;
+  countAllFiltered(search: string): Promise<number>;
 
-  getSellerByID(id: number): Promise<SellerEntity>;
+  findByID(id: number): Promise<ISellerResponse>;
 
-  updateSeller(
+  update(
     id: number,
     updateSellerDto: UpdateSellerDto,
-  ): Promise<SellerEntity>;
+  ): Promise<ISellerResponse>;
 
-  deleteSeller(id: number): Promise<IDefaultRepositoryResponse>;
+  delete(id: number): Promise<IDefaultRepositoryResponse>;
 }

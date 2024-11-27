@@ -40,17 +40,19 @@ model Role {
 }
 
 model Product {
-  id             Int     @id @default(autoincrement())
-  code           Int
-  name           String
-  description    String?
-  price          Int
-  priority_order Int
-  icms           Boolean
-  observations   String?
-  active_status  Boolean @default(true)
+  id                     Int     @id @default(autoincrement())
+  code                   Int
+  name                   String
+  name_unaccented        String
+  description            String
+  description_unaccented String
+  price                  Int
+  priority_order         Int
+  icms                   Boolean
+  observations           String?
+  deleted                Boolean @default(false)
 
-  warehouse_prodcts      WarehouseProduct[]
+  warehouses             WarehouseProduct[]
   financial_transactions FinancialTransaction[]
   productions            Production[]
   alerts                 Alert[]
@@ -90,6 +92,7 @@ model Warehouse {
 }
 
 model WarehouseProduct {
+  id         Int     @id @default(autoincrement())
   product_id Int
   product    Product @relation(fields: [product_id], references: [id])
 
@@ -145,22 +148,23 @@ model PaymentMethod {
 }
 
 model Seller {
-  id             Int     @id @default(autoincrement())
-  name           String
-  admission_date String
-  cpf            String  @unique
-  birth_date     String?
-  cep            String?
-  street_name    String?
-  house_number   Int?
-  city_name      String?
-  neighborhood   String?
-  state          String?
-  phone_1        String?
-  phone_2        String?
-  observation    String?
-  dismissal_date String?
-  active_status  Boolean @default(true)
+  id              Int     @id @default(autoincrement())
+  name            String
+  name_unaccented String
+  admission_date  String
+  cpf             String  @unique
+  birth_date      String?
+  cep             String?
+  street_name     String?
+  house_number    Int?
+  city_name       String?
+  neighborhood    String?
+  state           String?
+  phone_1         String?
+  phone_2         String?
+  observation     String?
+  dismissal_date  String?
+  deleted         Boolean @default(false)
 
   financial_transactions FinancialTransaction[]
 
@@ -171,25 +175,25 @@ model Seller {
 }
 
 model Client {
-  id                 Int     @id @default(autoincrement())
-  name               String
-  email              String  @unique
-  cpf                String? @unique
-  cnpj               String  @unique
-  state_registration String  @unique
-  registration_date  String
-  birth_date         String?
-  cep                String?
-  street_name        String?
-  house_number       Int?
-  city_name          String?
-  neighborhood       String?
-  state              String?
-  phone_1            String
-  phone_2            String?
-  whatsapp           String?
-  observation        String?
-  active_status      Boolean @default(true)
+  id                Int     @id @default(autoincrement())
+  name              String
+  name_unaccented   String
+  email             String  @unique
+  cpf               String? @unique
+  cnpj              String  @unique
+  registration_date String
+  birth_date        String?
+  cep               String?
+  street_name       String?
+  house_number      Int?
+  city_name         String?
+  neighborhood      String?
+  state             String?
+  phone_1           String
+  phone_2           String?
+  whatsapp          String?
+  observation       String?
+  active_status     Boolean @default(true)
 
   FinancialTransaction FinancialTransaction[]
 

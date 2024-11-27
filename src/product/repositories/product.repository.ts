@@ -3,10 +3,6 @@ import { Injectable } from '@nestjs/common';
 
 // Prisma
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Prisma } from '@prisma/client';
-
-// Entity
-import { ProductEntity } from '../entities/product.entity';
 
 // DTO
 import { CreateProductDto } from '../dto/create_product.dto';
@@ -15,128 +11,248 @@ import { UpdateProductDto } from '../dto/update_product.dto';
 // Interfaces
 import { IProductRepository } from '../interfaces/product_repository.interface';
 import { IDefaultRepositoryResponse } from 'src/common/interfaces/default_repository_response.interface';
+import { IProductResponse } from '../interfaces/product_response.interface';
 
-// Errors
-import { NotFoundError } from 'src/common/errors/types/not-found-error';
+// Utils
+import { removeAccents } from 'src/common/utils/remove_accents.utils';
 
 @Injectable()
 export class ProductRepository implements IProductRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   // Método que cria os produtos
-  async createProduct(
-    createProductDto: CreateProductDto,
-  ): Promise<ProductEntity> {
-    return this.prisma.product.create({ data: createProductDto });
+  async create(createProductDto: CreateProductDto): Promise<IProductResponse> {
+    return await this.prisma.product.create({
+      data: {
+        ...createProductDto,
+        name_unaccented: removeAccents(createProductDto.name),
+        description_unaccented: removeAccents(createProductDto.description),
+      },
+      select: {
+        id: true,
+        name: true,
+        name_unaccented: false,
+        code: true,
+        description: true,
+        description_unaccented: false,
+        price: true,
+        priority_order: true,
+        icms: true,
+        observations: true,
+        deleted: false,
+        warehouses: true,
+        financial_transactions: true,
+        productions: true,
+        alerts: true,
+        created_at: true,
+        updated_at: true,
+      },
+    });
   }
 
   // Método que busca todos os produtos
-  async getAllProducts(
+  async findAll(
     skip: number,
     limit: number,
     orderBy: 'asc' | 'desc',
-  ): Promise<ProductEntity[]> {
-    const products: ProductEntity[] = await this.prisma.product.findMany({
+  ): Promise<IProductResponse[]> {
+    const products: IProductResponse[] = await this.prisma.product.findMany({
       skip,
       take: limit,
       orderBy: { id: orderBy },
+      select: {
+        id: true,
+        name: true,
+        name_unaccented: false,
+        description: true,
+        code: true,
+        description_unaccented: false,
+        price: true,
+        priority_order: true,
+        icms: true,
+        observations: true,
+        deleted: false,
+        warehouses: true,
+        financial_transactions: true,
+        productions: true,
+        alerts: true,
+        created_at: true,
+        updated_at: true,
+      },
     });
 
     return products;
   }
 
   // Método que busca a quantidade total de produtos sem levar em consideração nenhum tipo de filtro
-  async getTotalProductCount(): Promise<number> {
+  async countAll(): Promise<number> {
     const count: number = await this.prisma.product.count();
 
     return count;
   }
 
   // Método que busca todos os produtos baseado no termo informado no campo de busca
-  async getFilteredProducts(
+  async findAllFiltered(
     search: string,
     skip: number,
     limit: number,
     orderBy: 'asc' | 'desc',
-  ): Promise<ProductEntity[]> {
-    const filteredProducts: ProductEntity[] = await this.prisma.$queryRaw`
-    SELECT * FROM products
-    WHERE unaccent("name") ILIKE unaccent('%' || ${search} || '%')
-      OR unaccent("description") ILIKE unaccent('%' || ${search} || '%')
-    ORDER BY "id" ${Prisma.raw(orderBy.toUpperCase())}
-    LIMIT ${Prisma.raw(limit.toString())} OFFSET ${Prisma.raw(skip.toString())};
-    `;
+  ): Promise<IProductResponse[]> {
+    const filteredProducts = await this.prisma.product.findMany({
+      where: {
+        OR: [
+          {
+            name: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+          {
+            name_unaccented: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+          {
+            description: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+          {
+            description_unaccented: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      },
+      skip,
+      take: limit,
+      orderBy: { id: orderBy },
+      select: {
+        id: true,
+        name: true,
+        name_unaccented: false,
+        code: true,
+        description: true,
+        description_unaccented: false,
+        price: true,
+        priority_order: true,
+        icms: true,
+        observations: true,
+        deleted: false,
+        warehouses: true,
+        financial_transactions: true,
+        productions: true,
+        alerts: true,
+        created_at: true,
+        updated_at: true,
+      },
+    });
 
     return filteredProducts;
   }
 
   // Método que busca a quantidade total de produtos levando em consideração o termo informado no campo de busca
-  async getFilteredProductCount(search: string): Promise<number> {
-    const query = await this.prisma.$queryRaw`
-    SELECT COUNT(*) as count FROM products
-    WHERE unaccent("name") ILIKE unaccent('%' || ${search} || '%')
-      OR unaccent("description") ILIKE unaccent('%' || ${search} || '%')
-    `;
-
-    const filteredProductsCount: number = Number(query[0]?.count || 0);
+  async countAllFiltered(search: string): Promise<number> {
+    const filteredProductsCount: number = await this.prisma.product.count({
+      where: {
+        OR: [
+          {
+            name: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+          {
+            name_unaccented: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+          {
+            description: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+          {
+            description_unaccented: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      },
+    });
 
     return filteredProductsCount;
   }
 
   // Método que busca o produto baseado no ID informado
-  async getProductByID(id: number): Promise<ProductEntity> {
-    const product: ProductEntity = await this.prisma.product.findUnique({
+  async findByID(id: number): Promise<IProductResponse> {
+    return await this.prisma.product.findUnique({
       where: {
         id,
       },
+      select: {
+        id: true,
+        name: true,
+        name_unaccented: false,
+        code: true,
+        description: true,
+        description_unaccented: false,
+        price: true,
+        priority_order: true,
+        icms: true,
+        observations: true,
+        deleted: false,
+        warehouses: true,
+        financial_transactions: true,
+        productions: true,
+        alerts: true,
+        created_at: true,
+        updated_at: true,
+      },
     });
-
-    if (!product) {
-      throw new NotFoundError('Nenhum registro com esse ID foi encontrado');
-    }
-
-    return product;
   }
 
   // Método que atualiza o produto baseado no ID informado
-  async updateProduct(
+  async update(
     id: number,
     updateProductDto: UpdateProductDto,
-  ): Promise<ProductEntity> {
-    const existingProduct: ProductEntity = await this.prisma.product.findUnique(
-      {
-        where: {
-          id,
-        },
-      },
-    );
-
-    if (!existingProduct) {
-      throw new NotFoundError('Nenhum registro com esse ID foi encontrado');
-    }
-
-    const updatingProduct: ProductEntity = await this.prisma.product.update({
+  ): Promise<IProductResponse> {
+    return await this.prisma.product.update({
       where: { id },
-      data: { ...updateProductDto },
+      data: {
+        ...updateProductDto,
+        name_unaccented: removeAccents(updateProductDto.name),
+      },
+      select: {
+        id: true,
+        name: true,
+        name_unaccented: false,
+        code: true,
+        description: true,
+        description_unaccented: false,
+        price: true,
+        priority_order: true,
+        icms: true,
+        observations: true,
+        deleted: false,
+        warehouses: true,
+        financial_transactions: true,
+        productions: true,
+        alerts: true,
+        created_at: true,
+        updated_at: true,
+      },
     });
-
-    return updatingProduct;
   }
 
   // Método que remove o produto do banco de dados
-  async deleteProduct(id: number): Promise<IDefaultRepositoryResponse> {
-    const existingProduct: ProductEntity = await this.prisma.product.findUnique(
-      {
-        where: {
-          id,
-        },
-      },
-    );
-
-    if (!existingProduct) {
-      throw new NotFoundError('Nenhum registro com esse ID foi encontrado');
-    }
-
+  async delete(id: number): Promise<IDefaultRepositoryResponse> {
     await this.prisma.product.delete({
       where: { id },
     });

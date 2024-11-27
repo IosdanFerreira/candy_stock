@@ -14,5 +14,6 @@ import { ProductController } from './product.controller';
 @Module({
   controllers: [ProductController],
   providers: [ProductService, PrismaService, ProductRepository],
+  exports: [ProductService],
 })
 export class ProductModule {}

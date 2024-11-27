@@ -11,15 +11,26 @@ import { UpdateWarehouseDto } from '../dto/update_warehouse.dto';
 // Interfaces
 import { IWarehouseRepository } from '../interfaces/warehouse_repository.interface';
 import { IDefaultRepositoryResponse } from 'src/common/interfaces/default_repository_response.interface';
+import { IWarehouseResponse } from '../interfaces/warehouse_response.interface';
 
 // Errors
 import { NotFoundError } from 'src/common/errors/types/not-found-error';
-import { IWarehouseResponse } from '../interfaces/warehouse_response.interface';
+
+// Utils
 import { removeAccents } from 'src/common/utils/remove_accents.utils';
 
 @Injectable()
 export class WarehouseRepository implements IWarehouseRepository {
   constructor(private readonly prisma: PrismaService) {}
+
+  // Gera um código de registro aleatório único
+  private generateRegisterCode(): string {
+    const currentDay = new Date().getTime().toString();
+    const randomCode = Math.floor(1000000000 + Math.random() * 9000000000);
+
+    const registerCode = `WH${currentDay}${randomCode}`;
+    return registerCode;
+  }
 
   async createWarehouse(
     createWarehouseDto: CreateWarehouseDto,
@@ -29,6 +40,7 @@ export class WarehouseRepository implements IWarehouseRepository {
         ...createWarehouseDto,
         name_unaccented: removeAccents(createWarehouseDto.name),
         description_unaccented: removeAccents(createWarehouseDto.description),
+        register_code: this.generateRegisterCode(),
       },
       select: {
         id: true,
@@ -48,8 +60,14 @@ export class WarehouseRepository implements IWarehouseRepository {
         state: true,
         deleted: false,
         stored_products: {
-          include: {
+          where: {
+            quantity: {
+              gt: 0,
+            },
+          },
+          select: {
             product: true,
+            quantity: true,
           },
         },
         created_at: true,
@@ -65,7 +83,7 @@ export class WarehouseRepository implements IWarehouseRepository {
     limit: number,
     orderBy: 'asc' | 'desc',
   ): Promise<IWarehouseResponse[]> {
-    const warehouses = await this.prisma.warehouse.findMany({
+    const allWarehouses = await this.prisma.warehouse.findMany({
       where: {
         deleted: false,
       },
@@ -85,8 +103,14 @@ export class WarehouseRepository implements IWarehouseRepository {
         state: true,
         deleted: false,
         stored_products: {
-          include: {
+          where: {
+            quantity: {
+              gt: 0,
+            },
+          },
+          select: {
             product: true,
+            quantity: true,
           },
         },
         created_at: true,
@@ -97,7 +121,7 @@ export class WarehouseRepository implements IWarehouseRepository {
       orderBy: { id: orderBy },
     });
 
-    return warehouses;
+    return allWarehouses;
   }
 
   async getTotalWarehouseCount(): Promise<number> {
@@ -169,8 +193,14 @@ export class WarehouseRepository implements IWarehouseRepository {
           state: true,
           deleted: false,
           stored_products: {
-            include: {
+            where: {
+              quantity: {
+                gt: 0,
+              },
+            },
+            select: {
               product: true,
+              quantity: true,
             },
           },
           created_at: true,
@@ -249,8 +279,14 @@ export class WarehouseRepository implements IWarehouseRepository {
           state: true,
           deleted: false,
           stored_products: {
-            include: {
+            where: {
+              quantity: {
+                gt: 0,
+              },
+            },
+            select: {
               product: true,
+              quantity: true,
             },
           },
           created_at: true,
@@ -291,8 +327,14 @@ export class WarehouseRepository implements IWarehouseRepository {
           state: true,
           deleted: false,
           stored_products: {
-            include: {
+            where: {
+              quantity: {
+                gt: 0,
+              },
+            },
+            select: {
               product: true,
+              quantity: true,
             },
           },
           created_at: true,
@@ -327,8 +369,14 @@ export class WarehouseRepository implements IWarehouseRepository {
           state: true,
           deleted: false,
           stored_products: {
-            include: {
+            where: {
+              quantity: {
+                gt: 0,
+              },
+            },
+            select: {
               product: true,
+              quantity: true,
             },
           },
           created_at: true,
@@ -362,8 +410,14 @@ export class WarehouseRepository implements IWarehouseRepository {
           state: true,
           deleted: false,
           stored_products: {
-            include: {
+            where: {
+              quantity: {
+                gt: 0,
+              },
+            },
+            select: {
               product: true,
+              quantity: true,
             },
           },
           created_at: true,
@@ -386,5 +440,47 @@ export class WarehouseRepository implements IWarehouseRepository {
       message: 'Registo excluído com sucesso!',
       statusCode: 200,
     };
+  }
+
+  async updateStoredQuantityOnWarehouse(
+    warehouseID: number,
+    quantityChange: number,
+  ) {
+    const updatedStoredQuantityOnWarehouse: IWarehouseResponse =
+      await this.prisma.warehouse.update({
+        where: { id: warehouseID },
+        data: { stored: { increment: quantityChange } },
+        select: {
+          id: true,
+          acronym: true,
+          name: true,
+          description: true,
+          register_code: true,
+          capacity: true,
+          stored: true,
+          cep: true,
+          street_name: true,
+          house_number: true,
+          city_name: true,
+          neighborhood: true,
+          state: true,
+          deleted: false,
+          stored_products: {
+            where: {
+              quantity: {
+                gt: 0,
+              },
+            },
+            select: {
+              product: true,
+              quantity: true,
+            },
+          },
+          created_at: true,
+          updated_at: true,
+        },
+      });
+
+    return updatedStoredQuantityOnWarehouse;
   }
 }

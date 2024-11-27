@@ -25,10 +25,6 @@ export class CreateClientDto {
 
   @IsString({ message: 'Este campo deve ser do tipo string' })
   @IsNotEmpty({ message: 'Este campo é obrigatório' })
-  state_registration: string;
-
-  @IsString({ message: 'Este campo deve ser do tipo string' })
-  @IsNotEmpty({ message: 'Este campo é obrigatório' })
   registration_date: string;
 
   @IsString({ message: 'Este campo deve ser do tipo string' })

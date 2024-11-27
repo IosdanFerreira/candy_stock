@@ -4,31 +4,28 @@ import { UpdateClientDto } from '../dto/update_client.dto';
 import { ClientEntity } from '../entities/client.entity';
 
 export interface IClientRepository {
-  createClient(createClientDto: CreateClientDto): Promise<ClientEntity>;
+  create(createClientDto: CreateClientDto): Promise<ClientEntity>;
 
-  getAllClients(
+  findAll(
     skip: number,
     limit: number,
     orderBy: 'asc' | 'desc',
   ): Promise<ClientEntity[]>;
 
-  getTotalClientCount(): Promise<number>;
+  countAll(): Promise<number>;
 
-  getFilteredClients(
+  findAllFiltered(
     search: string,
     skip: number,
     limit: number,
     orderBy: 'asc' | 'desc',
   ): Promise<ClientEntity[]>;
 
-  getFilteredClientCount(search: string): Promise<number>;
+  countFiltered(search: string): Promise<number>;
 
-  getClientByID(id: number): Promise<ClientEntity>;
+  findByID(id: number): Promise<ClientEntity>;
 
-  updateClient(
-    id: number,
-    updateClientDto: UpdateClientDto,
-  ): Promise<ClientEntity>;
+  update(id: number, updateClientDto: UpdateClientDto): Promise<ClientEntity>;
 
-  deleteClient(id: number): Promise<IDefaultRepositoryResponse>;
+  delete(id: number): Promise<IDefaultRepositoryResponse>;
 }

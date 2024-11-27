@@ -5,22 +5,28 @@ import { CreateClientDto } from '../dto/create_client.dto';
 import { UpdateClientDto } from '../dto/update_client.dto';
 import { ClientEntity } from '../entities/client.entity';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Prisma } from '@prisma/client';
 import { NotFoundError } from 'src/common/errors/types/not-found-error';
+import { removeAccents } from 'src/common/utils/remove_accents.utils';
 
 @Injectable()
 export class ClientRepository implements IClientRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createClient(createClientDto: CreateClientDto): Promise<ClientEntity> {
+  async create(createClientDto: CreateClientDto): Promise<ClientEntity> {
     const client = await this.prisma.client.create({
-      data: createClientDto,
+      data: {
+        ...createClientDto,
+        name_unaccented: removeAccents(createClientDto.name),
+      },
+      include: {
+        FinancialTransaction: true,
+      },
     });
 
     return client;
   }
 
-  async getAllClients(
+  async findAll(
     skip: number,
     limit: number,
     orderBy: 'asc' | 'desc',
@@ -29,79 +35,127 @@ export class ClientRepository implements IClientRepository {
       skip,
       take: limit,
       orderBy: { id: orderBy },
+      include: {
+        FinancialTransaction: true,
+      },
     });
 
     return allClients;
   }
 
-  async getTotalClientCount(): Promise<number> {
+  async countAll(): Promise<number> {
     const count = await this.prisma.client.count();
 
     return count;
   }
 
-  async getFilteredClients(
+  async findAllFiltered(
     search: string,
     skip: number,
     limit: number,
     orderBy: 'asc' | 'desc',
   ): Promise<ClientEntity[]> {
-    const allFilteredClients: ClientEntity[] = await this.prisma.$queryRaw`
-    SELECT * FROM clients
-    WHERE unaccent("name") ILIKE unaccent('%' || ${search} || '%')
-      OR unaccent("cnpj") ILIKE unaccent('%' || ${search} || '%')
-    ORDER BY "id" ${Prisma.raw(orderBy.toUpperCase())}
-    LIMIT ${Prisma.raw(limit.toString())} OFFSET ${Prisma.raw(skip.toString())};
-    `;
+    const allFilteredClients = await this.prisma.client.findMany({
+      where: {
+        OR: [
+          {
+            name: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+          {
+            name_unaccented: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+          {
+            cpf: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+          {
+            cnpj: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      },
+      skip,
+      take: limit,
+      orderBy: { id: orderBy },
+      include: {
+        FinancialTransaction: true,
+      },
+    });
 
     return allFilteredClients;
   }
 
-  async getFilteredClientCount(search: string): Promise<number> {
-    const query = await this.prisma.$queryRaw<[{ count: number }]>`
-    SELECT COUNT(*) as count FROM clients
-    WHERE unaccent("name") ILIKE unaccent('%' || ${search} || '%')
-      OR unaccent("cnpj") ILIKE unaccent('%' || ${search} || '%')
-    `;
-
-    const allFilteredClientsCount = Number(query[0]?.count || 0);
+  async countFiltered(search: string): Promise<number> {
+    const allFilteredClientsCount = await this.prisma.client.count({
+      where: {
+        OR: [
+          {
+            name: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+          {
+            name_unaccented: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+          {
+            cpf: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+          {
+            cnpj: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      },
+    });
 
     return allFilteredClientsCount;
   }
 
-  async getClientByID(id: number): Promise<ClientEntity> {
-    const client = await this.prisma.client.findUnique({
+  async findByID(id: number): Promise<ClientEntity> {
+    return await this.prisma.client.findUnique({
       where: { id },
+      include: {
+        FinancialTransaction: true,
+      },
     });
-
-    if (!client) {
-      throw new NotFoundError('Nenhum registro com esse ID foi encontrado');
-    }
-
-    return client;
   }
 
-  async updateClient(
+  async update(
     id: number,
     updateClientDto: UpdateClientDto,
   ): Promise<ClientEntity> {
-    const clientAlreadyExist = await this.prisma.client.findUnique({
+    return await this.prisma.client.update({
       where: { id },
+      data: {
+        ...updateClientDto,
+        name_unaccented: removeAccents(updateClientDto.name),
+      },
+      include: {
+        FinancialTransaction: true,
+      },
     });
-
-    if (!clientAlreadyExist) {
-      throw new NotFoundError('Nenhum registro com esse ID foi encontrado');
-    }
-
-    const updatingClient = await this.prisma.client.update({
-      where: { id },
-      data: updateClientDto,
-    });
-
-    return updatingClient;
   }
 
-  async deleteClient(id: number): Promise<IDefaultRepositoryResponse> {
+  async delete(id: number): Promise<IDefaultRepositoryResponse> {
     const clientAlreadyExist = await this.prisma.client.findUnique({
       where: { id },
     });

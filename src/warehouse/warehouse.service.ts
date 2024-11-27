@@ -1,5 +1,5 @@
 // Nest
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 
 // DTO
 import { CreateWarehouseDto } from './dto/create_warehouse.dto';
@@ -10,6 +10,7 @@ import { WarehouseRepository } from './repositories/warehouse.repository';
 
 // Utils
 import { paginationMeta } from 'src/common/utils/pagination_meta.utils';
+import { IWarehouseResponse } from './interfaces/warehouse_response.interface';
 
 @Injectable()
 export class WarehouseService {
@@ -80,5 +81,29 @@ export class WarehouseService {
 
   remove(id: number) {
     return this.repository.deleteWarehouse(id);
+  }
+
+  async checkWarehouseCapacity(
+    warehouseID: number,
+    quantityToBeStored: number,
+  ): Promise<void> {
+    // Verifica se o armazém existe
+    const warehouse: IWarehouseResponse =
+      await this.repository.getWarehouseByID(warehouseID); // Reutiliza o método de busca
+
+    // verifica a capacidade disponível para armazenamento
+    if (warehouse.stored + quantityToBeStored > warehouse.capacity) {
+      throw new BadRequestException('A capacidade do armazém foi excedida');
+    }
+  }
+
+  updateStoredQuantityOnWarehouse(
+    warehouseID: number,
+    quantityChange: number,
+  ): Promise<IWarehouseResponse> {
+    return this.repository.updateStoredQuantityOnWarehouse(
+      warehouseID,
+      quantityChange,
+    );
   }
 }

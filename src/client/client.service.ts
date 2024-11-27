@@ -3,16 +3,17 @@ import { CreateClientDto } from './dto/create_client.dto';
 import { UpdateClientDto } from './dto/update_client.dto';
 import { ClientRepository } from './repositories/client.repository';
 import { paginationMeta } from 'src/common/utils/pagination_meta.utils';
+import { NotFoundError } from 'src/common/errors/types/not-found-error';
 
 @Injectable()
 export class ClientService {
   constructor(private readonly repository: ClientRepository) {}
 
-  create(createClientDto: CreateClientDto) {
-    return this.repository.createClient(createClientDto);
+  async registerClient(createClientDto: CreateClientDto) {
+    return await this.repository.create(createClientDto);
   }
 
-  async findAll(
+  async getAllClients(
     page: number = 1,
     limit: number = 50,
     orderBy: 'asc' | 'desc' = 'asc',
@@ -20,17 +21,20 @@ export class ClientService {
   ) {
     const skip = (page - 1) * limit;
 
+    // Se o campo de busca estiver preenchido na query, deve retornar o resultado com todos os clientes filtrado
     if (search) {
-      const filteredClientCount =
-        await this.repository.getFilteredClientCount(search);
+      // Número total de registro filtrados encontrado
+      const filteredClientCount = await this.repository.countFiltered(search);
 
-      const filteredClients = await this.repository.getFilteredClients(
+      // Total de clientes que correspondem a busca
+      const filteredClients = await this.repository.findAllFiltered(
         search,
         skip,
         limit,
         orderBy,
       );
 
+      // Estrutura de paginação dos resultados filtrados
       const filteredPagination = paginationMeta(
         filteredClientCount,
         page,
@@ -46,29 +50,44 @@ export class ClientService {
       };
     }
 
-    const clientsCount = await this.repository.getTotalClientCount();
+    // Número total de registros de clientes encontrados no banco de dados
+    const clientsCount = await this.repository.countAll();
 
-    const clients = await this.repository.getAllClients(skip, limit, orderBy);
+    // Dados de todos os clientes
+    const allClients = await this.repository.findAll(skip, limit, orderBy);
 
+    // Estrutura de paginação para o resultado padrão
     const pagination = paginationMeta(clientsCount, page, limit);
 
     return {
-      data: clients,
+      data: allClients,
       meta: {
         ...pagination,
       },
     };
   }
 
-  findOne(id: number) {
-    return this.repository.getClientByID(id);
+  async getClientByID(id: number) {
+    const client = await this.repository.findByID(id);
+
+    if (!client) {
+      throw new NotFoundError('Nenhum cliente com esse ID foi encontrado');
+    }
+
+    return client;
   }
 
-  update(id: number, updateClientDto: UpdateClientDto) {
-    return this.repository.updateClient(id, updateClientDto);
+  async updateClient(id: number, updateClientDto: UpdateClientDto) {
+    const clientAlreadyExist = await this.repository.findByID(id);
+
+    if (!clientAlreadyExist) {
+      throw new NotFoundError('Nenhum cliente com esse ID foi encontrado');
+    }
+
+    return await this.repository.update(id, updateClientDto);
   }
 
-  remove(id: number) {
-    return this.repository.deleteClient(id);
+  async deleteClient(id: number) {
+    return await this.repository.delete(id);
   }
 }

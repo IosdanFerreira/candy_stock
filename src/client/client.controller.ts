@@ -18,7 +18,7 @@ export class ClientController {
 
   @Post()
   create(@Body() createClientDto: CreateClientDto) {
-    return this.clientService.create(createClientDto);
+    return this.clientService.registerClient(createClientDto);
   }
 
   @Get()
@@ -28,21 +28,21 @@ export class ClientController {
     @Query('order_by') orderBy: 'asc' | 'desc',
     @Query('search') search?: string,
   ) {
-    return this.clientService.findAll(page, limit, orderBy, search);
+    return this.clientService.getAllClients(page, limit, orderBy, search);
   }
 
   @Get(':id')
   findOne(@Param('id') id: number) {
-    return this.clientService.findOne(id);
+    return this.clientService.getClientByID(id);
   }
 
   @Put(':id')
   update(@Param('id') id: number, @Body() updateClientDto: UpdateClientDto) {
-    return this.clientService.update(id, updateClientDto);
+    return this.clientService.updateClient(id, updateClientDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: number) {
-    return this.clientService.remove(id);
+    return this.clientService.deleteClient(id);
   }
 }

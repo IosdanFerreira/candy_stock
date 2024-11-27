@@ -1,39 +1,37 @@
-// Entity
-import { ProductEntity } from '../entities/product.entity';
-
 // DTO
 import { CreateProductDto } from '../dto/create_product.dto';
 import { UpdateProductDto } from '../dto/update_product.dto';
 
 // Interfaces
 import { IDefaultRepositoryResponse } from 'src/common/interfaces/default_repository_response.interface';
+import { IProductResponse } from './product_response.interface';
 
 export interface IProductRepository {
-  createProduct(createProductDto: CreateProductDto): Promise<ProductEntity>;
+  create(createProductDto: CreateProductDto): Promise<IProductResponse>;
 
-  getAllProducts(
+  findAll(
     skip: number,
     limit: number,
     orderBy: 'asc' | 'desc',
-  ): Promise<ProductEntity[]>;
+  ): Promise<IProductResponse[]>;
 
-  getTotalProductCount(): Promise<number>;
+  countAll(): Promise<number>;
 
-  getFilteredProducts(
+  findAllFiltered(
     search: string,
     skip: number,
     limit: number,
     orderBy: 'asc' | 'desc',
-  ): Promise<ProductEntity[]>;
+  ): Promise<IProductResponse[]>;
 
-  getFilteredProductCount(search: string): Promise<number>;
+  countAllFiltered(search: string): Promise<number>;
 
-  getProductByID(id: number): Promise<ProductEntity>;
+  findByID(id: number): Promise<IProductResponse>;
 
-  updateProduct(
+  update(
     id: number,
     updateProductDto: UpdateProductDto,
-  ): Promise<ProductEntity>;
+  ): Promise<IProductResponse>;
 
-  deleteProduct(id: number): Promise<IDefaultRepositoryResponse>;
+  delete(id: number): Promise<IDefaultRepositoryResponse>;
 }

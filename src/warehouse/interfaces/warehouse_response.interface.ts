@@ -14,9 +14,9 @@ export interface IWarehouseResponse {
   city_name: string;
   neighborhood: string;
   state: string;
-  deleted?: boolean;
   stored_products: {
     product: ProductEntity;
+    quantity: number;
   }[];
   created_at: Date;
   updated_at: Date;

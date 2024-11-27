@@ -23,7 +23,7 @@ export class ProductController {
 
   @Post()
   create(@Body() createProductDto: CreateProductDto) {
-    return this.productService.create(createProductDto);
+    return this.productService.registerProduct(createProductDto);
   }
 
   @Get()
@@ -33,21 +33,21 @@ export class ProductController {
     @Query('order_by') orderBy: 'asc' | 'desc',
     @Query('search') search?: string,
   ) {
-    return this.productService.findAll(page, limit, orderBy, search);
+    return this.productService.getAllProducts(page, limit, orderBy, search);
   }
 
   @Get(':id')
   findOne(@Param('id') id: number) {
-    return this.productService.findOne(id);
+    return this.productService.getProductByID(id);
   }
 
   @Put(':id')
   update(@Param('id') id: number, @Body() updateProductDto: UpdateProductDto) {
-    return this.productService.update(id, updateProductDto);
+    return this.productService.updateProduct(id, updateProductDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: number) {
-    return this.productService.remove(id);
+    return this.productService.deleteProduct(id);
   }
 }

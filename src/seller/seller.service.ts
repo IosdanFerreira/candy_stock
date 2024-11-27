@@ -3,16 +3,17 @@ import { CreateSellerDto } from './dto/create_seller.dto';
 import { UpdateSellerDto } from './dto/update_seller.dto';
 import { SellerRepository } from './repositories/seller.repository';
 import { paginationMeta } from 'src/common/utils/pagination_meta.utils';
+import { NotFoundError } from 'src/common/errors/types/not-found-error';
 
 @Injectable()
 export class SellerService {
   constructor(private readonly repository: SellerRepository) {}
 
-  create(createSellerDto: CreateSellerDto) {
-    return this.repository.createSeller(createSellerDto);
+  async registerSeller(createSellerDto: CreateSellerDto) {
+    return await this.repository.create(createSellerDto);
   }
 
-  async findAll(
+  async getAllSellers(
     page: number = 1,
     limit: number = 50,
     orderBy: 'asc' | 'desc' = 'asc',
@@ -22,9 +23,9 @@ export class SellerService {
 
     if (search) {
       const filteredSellerCount =
-        await this.repository.getFilteredSellerCount(search);
+        await this.repository.countAllFiltered(search);
 
-      const filteredSellers = await this.repository.getFilteredSellers(
+      const filteredSellers = await this.repository.findAllFiltered(
         search,
         skip,
         limit,
@@ -46,9 +47,9 @@ export class SellerService {
       };
     }
 
-    const sellersCount = await this.repository.getTotalSellerCount();
+    const sellersCount = await this.repository.countAll();
 
-    const products = await this.repository.getAllSellers(skip, limit, orderBy);
+    const products = await this.repository.findAll(skip, limit, orderBy);
 
     const pagination = paginationMeta(sellersCount, page, limit);
 
@@ -60,15 +61,25 @@ export class SellerService {
     };
   }
 
-  findOne(id: number) {
-    return this.repository.getSellerByID(id);
+  async getSellerByID(id: number) {
+    const seller = await this.repository.findByID(id);
+
+    if (!seller) {
+      throw new NotFoundError('Nenhum vendedor com esse ID foi encontrado');
+    }
+
+    return seller;
   }
 
-  update(id: number, updateSellerDto: UpdateSellerDto) {
-    return this.repository.updateSeller(id, updateSellerDto);
+  async updateSeller(id: number, updateSellerDto: UpdateSellerDto) {
+    await this.getSellerByID(id);
+
+    return this.repository.update(id, updateSellerDto);
   }
 
-  remove(id: number) {
-    return this.repository.deleteSeller(id);
+  async deleteSeller(id: number) {
+    await this.getSellerByID(id);
+
+    return this.repository.delete(id);
   }
 }

@@ -11,6 +11,7 @@ import { WarehouseModule } from './warehouse/warehouse.module';
 import { PrismaService } from './prisma/prisma.service';
 import { SellerModule } from './seller/seller.module';
 import { ClientModule } from './client/client.module';
+import { ProductInventoryModule } from './product_inventory/product_inventory.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { ClientModule } from './client/client.module';
     WarehouseModule,
     SellerModule,
     ClientModule,
+    ProductInventoryModule,
   ],
   controllers: [AppController],
   providers: [

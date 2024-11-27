@@ -3,113 +3,231 @@ import { ISellerRepository } from '../interfaces/seller_repository.interface';
 import { IDefaultRepositoryResponse } from 'src/common/interfaces/default_repository_response.interface';
 import { CreateSellerDto } from '../dto/create_seller.dto';
 import { UpdateSellerDto } from '../dto/update_seller.dto';
-import { SellerEntity } from '../entities/seller.entity';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Prisma } from '@prisma/client';
-import { NotFoundError } from 'src/common/errors/types/not-found-error';
+import { removeAccents } from 'src/common/utils/remove_accents.utils';
+import { ISellerResponse } from '../interfaces/seller_response.interface';
 
 @Injectable()
 export class SellerRepository implements ISellerRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createSeller(createSellerDto: CreateSellerDto): Promise<SellerEntity> {
-    const seller = await this.prisma.seller.create({
-      data: createSellerDto,
+  async create(createSellerDto: CreateSellerDto): Promise<ISellerResponse> {
+    return await this.prisma.seller.create({
+      data: {
+        ...createSellerDto,
+        name_unaccented: removeAccents(createSellerDto.name),
+      },
+      select: {
+        id: true,
+        name: true,
+        name_unaccented: false,
+        admission_date: true,
+        cpf: true,
+        birth_date: true,
+        cep: true,
+        street_name: true,
+        house_number: true,
+        city_name: true,
+        neighborhood: true,
+        state: true,
+        phone_1: true,
+        phone_2: true,
+        observation: true,
+        dismissal_date: true,
+        financial_transactions: true,
+        created_at: true,
+        updated_at: true,
+        deleted: false,
+      },
     });
-
-    return seller;
   }
 
-  async getAllSellers(
+  async findAll(
     skip: number,
     limit: number,
     orderBy: 'asc' | 'desc',
-  ): Promise<SellerEntity[]> {
-    const allSellers = await this.prisma.seller.findMany({
+  ): Promise<ISellerResponse[]> {
+    return await this.prisma.seller.findMany({
       skip,
       take: limit,
       orderBy: { id: orderBy },
+      select: {
+        id: true,
+        name: true,
+        name_unaccented: false,
+        admission_date: true,
+        cpf: true,
+        birth_date: true,
+        cep: true,
+        street_name: true,
+        house_number: true,
+        city_name: true,
+        neighborhood: true,
+        state: true,
+        phone_1: true,
+        phone_2: true,
+        observation: true,
+        dismissal_date: true,
+        financial_transactions: true,
+        created_at: true,
+        updated_at: true,
+        deleted: false,
+      },
     });
-
-    return allSellers;
   }
 
-  async getTotalSellerCount(): Promise<number> {
-    const count = await this.prisma.seller.count();
-
-    return count;
+  async countAll(): Promise<number> {
+    return await this.prisma.seller.count();
   }
 
-  async getFilteredSellers(
+  async findAllFiltered(
     search: string,
     skip: number,
     limit: number,
     orderBy: 'asc' | 'desc',
-  ): Promise<SellerEntity[]> {
-    const allFilteredSellers: SellerEntity[] = await this.prisma.$queryRaw`
-    SELECT * FROM sellers
-    WHERE unaccent("name") ILIKE unaccent('%' || ${search} || '%')
-      OR unaccent("cpf") ILIKE unaccent('%' || ${search} || '%')
-    ORDER BY "id" ${Prisma.raw(orderBy.toUpperCase())}
-    LIMIT ${Prisma.raw(limit.toString())} OFFSET ${Prisma.raw(skip.toString())};
-    `;
-
-    return allFilteredSellers;
-  }
-
-  async getFilteredSellerCount(search: string): Promise<number> {
-    const query = await this.prisma.$queryRaw<[{ count: number }]>`
-    SELECT COUNT(*) as count FROM sellers
-    WHERE unaccent("name") ILIKE unaccent('%' || ${search} || '%')
-      OR unaccent("cpf") ILIKE unaccent('%' || ${search} || '%')
-    `;
-
-    const allFilteredSellersCount = Number(query[0]?.count || 0);
-
-    return allFilteredSellersCount;
-  }
-
-  async getSellerByID(id: number): Promise<SellerEntity> {
-    const seller = await this.prisma.seller.findUnique({
-      where: { id },
+  ): Promise<ISellerResponse[]> {
+    return await this.prisma.seller.findMany({
+      where: {
+        OR: [
+          {
+            name: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+          {
+            name_unaccented: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+          {
+            cpf: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      },
+      skip,
+      take: limit,
+      orderBy: { id: orderBy },
+      select: {
+        id: true,
+        name: true,
+        name_unaccented: false,
+        admission_date: true,
+        cpf: true,
+        birth_date: true,
+        cep: true,
+        street_name: true,
+        house_number: true,
+        city_name: true,
+        neighborhood: true,
+        state: true,
+        phone_1: true,
+        phone_2: true,
+        observation: true,
+        dismissal_date: true,
+        financial_transactions: true,
+        created_at: true,
+        updated_at: true,
+        deleted: false,
+      },
     });
-
-    if (!seller) {
-      throw new NotFoundError('Nenhum registro com esse ID foi encontrado');
-    }
-
-    return seller;
   }
 
-  async updateSeller(
+  async countAllFiltered(search: string): Promise<number> {
+    return await this.prisma.seller.count({
+      where: {
+        OR: [
+          {
+            name: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+          {
+            name_unaccented: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+          {
+            cpf: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      },
+    });
+  }
+
+  async findByID(id: number): Promise<ISellerResponse> {
+    return await this.prisma.seller.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        name_unaccented: false,
+        admission_date: true,
+        cpf: true,
+        birth_date: true,
+        cep: true,
+        street_name: true,
+        house_number: true,
+        city_name: true,
+        neighborhood: true,
+        state: true,
+        phone_1: true,
+        phone_2: true,
+        observation: true,
+        dismissal_date: true,
+        financial_transactions: true,
+        created_at: true,
+        updated_at: true,
+        deleted: false,
+      },
+    });
+  }
+
+  async update(
     id: number,
     updateSellerDto: UpdateSellerDto,
-  ): Promise<SellerEntity> {
-    const sellerAlreadyExist = await this.prisma.seller.findUnique({
+  ): Promise<ISellerResponse> {
+    return await this.prisma.seller.update({
       where: { id },
+      data: {
+        ...updateSellerDto,
+        name_unaccented: removeAccents(updateSellerDto.name),
+      },
+      select: {
+        id: true,
+        name: true,
+        name_unaccented: false,
+        admission_date: true,
+        cpf: true,
+        birth_date: true,
+        cep: true,
+        street_name: true,
+        house_number: true,
+        city_name: true,
+        neighborhood: true,
+        state: true,
+        phone_1: true,
+        phone_2: true,
+        observation: true,
+        dismissal_date: true,
+        financial_transactions: true,
+        created_at: true,
+        updated_at: true,
+        deleted: false,
+      },
     });
-
-    if (!sellerAlreadyExist) {
-      throw new NotFoundError('Nenhum registro com esse ID foi encontrado');
-    }
-
-    const updatingSeller = await this.prisma.seller.update({
-      where: { id },
-      data: updateSellerDto,
-    });
-
-    return updatingSeller;
   }
 
-  async deleteSeller(id: number): Promise<IDefaultRepositoryResponse> {
-    const sellerAlreadyExist = await this.prisma.seller.findUnique({
-      where: { id },
-    });
-
-    if (!sellerAlreadyExist) {
-      throw new NotFoundError('Nenhum registro com esse ID foi encontrado');
-    }
-
+  async delete(id: number): Promise<IDefaultRepositoryResponse> {
     await this.prisma.seller.delete({
       where: { id },
     });

@@ -10,16 +10,17 @@ import { ProductRepository } from './repositories/product.repository';
 
 // Utils
 import { paginationMeta } from 'src/common/utils/pagination_meta.utils';
+import { NotFoundError } from 'src/common/errors/types/not-found-error';
 
 @Injectable()
 export class ProductService {
   constructor(private readonly repository: ProductRepository) {}
 
-  create(createProductDto: CreateProductDto) {
-    return this.repository.createProduct(createProductDto);
+  async registerProduct(createProductDto: CreateProductDto) {
+    return await this.repository.create(createProductDto);
   }
 
-  async findAll(
+  async getAllProducts(
     page: number = 1,
     limit: number = 50,
     orderBy: 'asc' | 'desc' = 'asc',
@@ -28,10 +29,9 @@ export class ProductService {
     const skip = (page - 1) * limit;
 
     if (search) {
-      const filteredTotalItems =
-        await this.repository.getFilteredProductCount(search);
+      const filteredTotalItems = await this.repository.countAllFiltered(search);
 
-      const filteredProducts = await this.repository.getFilteredProducts(
+      const filteredProducts = await this.repository.findAllFiltered(
         search,
         skip,
         limit,
@@ -53,9 +53,9 @@ export class ProductService {
       };
     }
 
-    const totalItem = await this.repository.getTotalProductCount();
+    const totalItem = await this.repository.countAll();
 
-    const products = await this.repository.getAllProducts(skip, limit, orderBy);
+    const products = await this.repository.findAll(skip, limit, orderBy);
 
     const pagination = paginationMeta(totalItem, page, limit);
 
@@ -67,15 +67,25 @@ export class ProductService {
     };
   }
 
-  findOne(id: number) {
-    return this.repository.getProductByID(id);
+  async getProductByID(id: number) {
+    const productAlreadyExist = await this.repository.findByID(id);
+
+    if (!productAlreadyExist) {
+      throw new NotFoundError('Nenhum produto com esse ID foi encontrado');
+    }
+
+    return productAlreadyExist;
   }
 
-  update(id: number, updateProductDto: UpdateProductDto) {
-    return this.repository.updateProduct(id, updateProductDto);
+  async updateProduct(id: number, updateProductDto: UpdateProductDto) {
+    await this.getProductByID(id);
+
+    return await this.repository.update(id, updateProductDto);
   }
 
-  remove(id: number) {
-    return this.repository.deleteProduct(id);
+  async deleteProduct(id: number) {
+    await this.getProductByID(id);
+
+    return await this.repository.delete(id);
   }
 }

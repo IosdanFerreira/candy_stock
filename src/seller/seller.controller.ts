@@ -18,7 +18,7 @@ export class SellerController {
 
   @Post()
   create(@Body() createSellerDto: CreateSellerDto) {
-    return this.sellerService.create(createSellerDto);
+    return this.sellerService.registerSeller(createSellerDto);
   }
 
   @Get()
@@ -28,21 +28,21 @@ export class SellerController {
     @Query('order_by') orderBy: 'asc' | 'desc',
     @Query('search') search?: string,
   ) {
-    return this.sellerService.findAll(page, limit, orderBy, search);
+    return this.sellerService.getAllSellers(page, limit, orderBy, search);
   }
 
   @Get(':id')
   findOne(@Param('id') id: number) {
-    return this.sellerService.findOne(id);
+    return this.sellerService.getSellerByID(id);
   }
 
   @Put(':id')
   update(@Param('id') id: number, @Body() updateSellerDto: UpdateSellerDto) {
-    return this.sellerService.update(id, updateSellerDto);
+    return this.sellerService.updateSeller(id, updateSellerDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: number) {
-    return this.sellerService.remove(id);
+    return this.sellerService.deleteSeller(id);
   }
 }

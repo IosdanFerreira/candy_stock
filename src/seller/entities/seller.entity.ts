@@ -3,6 +3,7 @@ import { Seller } from '@prisma/client';
 export class SellerEntity implements Seller {
   id: number;
   name: string;
+  name_unaccented: string;
   admission_date: string;
   cpf: string;
   birth_date: string;
@@ -16,7 +17,7 @@ export class SellerEntity implements Seller {
   phone_2: string;
   observation: string;
   dismissal_date: string;
-  active_status: boolean;
+  deleted: boolean;
   created_at: Date;
   updated_at: Date;
 }

@@ -36,4 +36,9 @@ export interface IWarehouseRepository {
   ): Promise<IWarehouseResponse>;
 
   deleteWarehouse(id: number): Promise<IDefaultRepositoryResponse>;
+
+  updateStoredQuantityOnWarehouse(
+    warehouseID: number,
+    quantityChange: number,
+  ): Promise<IWarehouseResponse>;
 }

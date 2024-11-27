@@ -53,7 +53,6 @@ export class CreateSellerDto {
   @IsOptional()
   observation: string;
 
-  @IsString({ message: 'Este campo deve ser do tipo string' })
-  @IsNotEmpty({ message: 'Este campo é obrigatório' })
-  dismissal_date: string;
+  @IsOptional()
+  dismissal_date: string | null;
 }

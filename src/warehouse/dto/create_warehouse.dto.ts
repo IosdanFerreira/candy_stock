@@ -20,10 +20,6 @@ export class CreateWarehouseDto {
   @IsNotEmpty({ message: 'Este campo é obrigatório' })
   description: string;
 
-  @IsString({ message: 'Este campo deve ser do tipo string' })
-  @IsNotEmpty({ message: 'Este campo é obrigatório' })
-  register_code: string;
-
   @IsInt({ message: 'Este campo deve ser do tipo number' })
   @Min(1)
   @IsNotEmpty({ message: 'Este campo é obrigatório' })
