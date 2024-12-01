@@ -1,6 +1,6 @@
 import { WarehouseProduct } from '@prisma/client';
 
-export class ProductInventory implements WarehouseProduct {
+export class ProductInventoryEntity implements WarehouseProduct {
   id: number;
   warehouse_id: number;
   product_id: number;

@@ -1,8 +1,33 @@
 import { CreateProductInventoryDto } from '../dto/create_product_inventory.dto';
-import { ProductInventory } from '../entities/product_inventory.entity';
+import { UpdateProductInventoryDto } from '../dto/update_product_inventory.dto';
+import { IProductInventoryResponse } from './product_inventory_response';
 
 export interface IProductInventoryRepository {
-  addProductToWarehouse(
+  create(
     createProductInventoryDto: CreateProductInventoryDto,
-  ): Promise<ProductInventory>;
+  ): Promise<IProductInventoryResponse>;
+
+  findAll(
+    skip: number,
+    limit: number,
+    orderBy: 'asc' | 'desc',
+  ): Promise<IProductInventoryResponse[]>;
+
+  countAll(): Promise<number>;
+
+  findAllFiltered(
+    skip: number,
+    limit: number,
+    orderBy: 'asc' | 'desc',
+    search: string,
+  ): Promise<IProductInventoryResponse[]>;
+
+  countAllFiltered(search: string): Promise<number>;
+
+  findByID(id: number): Promise<IProductInventoryResponse>;
+
+  update(
+    productInventoryOperationID: number,
+    updateProductInventoryDto: UpdateProductInventoryDto,
+  ): Promise<IProductInventoryResponse>;
 }

@@ -3,9 +3,10 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
+  Query,
+  Put,
 } from '@nestjs/common';
 import { ProductInventoryService } from './product_inventory.service';
 import { CreateProductInventoryDto } from './dto/create_product_inventory.dto';
@@ -25,25 +26,38 @@ export class ProductInventoryController {
   }
 
   @Get()
-  findAll() {
-    return this.productInventoryService.findAll();
+  findAll(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+    @Query('order_by') orderBy: 'asc' | 'desc',
+    @Query('search') search?: string,
+  ) {
+    return this.productInventoryService.getAllProductInventoriesOperations(
+      page,
+      limit,
+      orderBy,
+      search,
+    );
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.productInventoryService.findOne(+id);
+  findOne(@Param('id') id: number) {
+    return this.productInventoryService.getProductInventoryOperationByID(id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   update(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() updateProductInventoryDto: UpdateProductInventoryDto,
   ) {
-    return this.productInventoryService.update(+id, updateProductInventoryDto);
+    return this.productInventoryService.updateProductQuantityInWarehouse(
+      id,
+      updateProductInventoryDto,
+    );
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.productInventoryService.remove(+id);
+  remove(@Param('id') id: number) {
+    return this.productInventoryService.remove(id);
   }
 }

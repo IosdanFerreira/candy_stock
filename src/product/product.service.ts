@@ -30,18 +30,17 @@ export class ProductService {
 
     if (search) {
       const filteredTotalItems = await this.repository.countAllFiltered(search);
+      const filteredPagination = paginationMeta(
+        filteredTotalItems,
+        page,
+        limit,
+      );
 
       const filteredProducts = await this.repository.findAllFiltered(
         search,
         skip,
         limit,
         orderBy,
-      );
-
-      const filteredPagination = paginationMeta(
-        filteredTotalItems,
-        page,
-        limit,
       );
 
       return {
@@ -53,11 +52,10 @@ export class ProductService {
       };
     }
 
-    const totalItem = await this.repository.countAll();
+    const totalItems = await this.repository.countAll();
+    const pagination = paginationMeta(totalItems, page, limit);
 
     const products = await this.repository.findAll(skip, limit, orderBy);
-
-    const pagination = paginationMeta(totalItem, page, limit);
 
     return {
       data: products,
