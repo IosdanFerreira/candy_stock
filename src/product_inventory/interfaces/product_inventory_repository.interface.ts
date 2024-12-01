@@ -1,3 +1,4 @@
+import { IDefaultRepositoryResponse } from 'src/common/interfaces/default_repository_response.interface';
 import { CreateProductInventoryDto } from '../dto/create_product_inventory.dto';
 import { UpdateProductInventoryDto } from '../dto/update_product_inventory.dto';
 import { IProductInventoryResponse } from './product_inventory_response';
@@ -30,4 +31,8 @@ export interface IProductInventoryRepository {
     productInventoryOperationID: number,
     updateProductInventoryDto: UpdateProductInventoryDto,
   ): Promise<IProductInventoryResponse>;
+
+  delete(
+    productInventoryOperationID: number,
+  ): Promise<IDefaultRepositoryResponse>;
 }
