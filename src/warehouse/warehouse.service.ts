@@ -101,7 +101,7 @@ export class WarehouseService {
     const warehouse = await this.getWarehouseByID(warehouseID);
 
     // verifica a capacidade disponível para armazenamento
-    if (warehouse.stored + quantityToBeStored >= warehouse.capacity) {
+    if (warehouse.stored + quantityToBeStored > warehouse.capacity) {
       throw new BadRequestException('A capacidade do armazém foi excedida');
     }
   }
